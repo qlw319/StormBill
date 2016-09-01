@@ -1,0 +1,13 @@
+package com.stormbill.stormbill.common_type;
+
+public class IncomeAndPay
+{
+	public double dIncome;
+	public double dPay;
+
+	public IncomeAndPay()
+	{
+		dIncome = 0;
+		dPay = 0;
+	}
+}
