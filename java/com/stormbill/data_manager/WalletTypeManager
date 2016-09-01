@@ -1,0 +1,107 @@
+package com.stormbill.stormbill.data_manager;
+
+import com.stormbill.stormbill.common_type.WalletTypes;
+import com.stormbill.stormbill.database_manager.SQLiteDatabaseManager;
+
+import java.util.ArrayList;
+
+import static com.stormbill.stormbill.datastructs.ControlCenter.GetWalletTypes;
+
+public class WalletTypeManager
+{
+	public static boolean LoadWalletType(ArrayList<WalletTypes> arrWalletType, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		if(arrWalletType == null)
+			return false;
+
+		return sqLiteDatabaseManager.LoadAllWalletType(arrWalletType);
+	}
+
+	public static boolean ChangeName(int nIndex, String strNewName, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		if(strNewName == null || strNewName.length() == 0)
+			return false;
+
+		ArrayList<WalletTypes> arrayList = GetWalletTypes();
+		if(arrayList == null || nIndex >= arrayList.size())
+			return false;
+
+		WalletTypes walletType = arrayList.get(nIndex);
+
+		WalletTypes walletTypes = new WalletTypes();
+		walletTypes.strName = strNewName;
+		walletTypes.strLayoutName = walletType.strLayoutName;
+		walletTypes.strColor = walletType.strColor;
+		walletTypes.nWalletTypeID = walletType.nWalletTypeID;
+		if(sqLiteDatabaseManager.ModifyAWalletType(walletTypes) == false)
+			return false;
+
+		walletType.strName = strNewName;
+
+		return true;
+	}
+
+	public static boolean ChangeBackgroundColor(int nIndex, String strNewColor, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		if(strNewColor == null || strNewColor.length() == 0)
+			return false;
+
+		ArrayList<WalletTypes> arrayList = GetWalletTypes();
+		if(arrayList == null || nIndex >= arrayList.size())
+			return false;
+
+		WalletTypes walletType = arrayList.get(nIndex);
+
+		WalletTypes walletTypes = new WalletTypes();
+		walletTypes.strName = walletType.strName;
+		walletTypes.strLayoutName = walletType.strLayoutName;
+		walletTypes.strColor = strNewColor;
+		walletTypes.nWalletTypeID = walletType.nWalletTypeID;
+		if(sqLiteDatabaseManager.ModifyAWalletType(walletTypes) == false)
+			return false;
+
+		walletType.strColor = strNewColor;
+
+		return true;
+	}
+
+	public static boolean DeleteSpecifiedType(int nIndex, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		ArrayList<WalletTypes> arrayList = GetWalletTypes();
+		if(arrayList == null || nIndex >= arrayList.size())
+			return false;
+
+		if(sqLiteDatabaseManager.DeleteAWalletType(arrayList.get(nIndex)) == false)
+			return false;
+
+		arrayList.remove(nIndex);
+		return true;
+	}
+
+	public static boolean AddNewType(WalletTypes eNewWalletTypes, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		if(GetIndexByNameAndType(eNewWalletTypes.strName, eNewWalletTypes.strLayoutName) != -1)
+			return false;
+
+		return sqLiteDatabaseManager.AddAWalletType(eNewWalletTypes);
+	}
+
+	public static int GetIndexByNameAndType(String strName, String strType)
+	{
+		ArrayList<WalletTypes> arrayList = GetWalletTypes();
+		if(arrayList == null)
+			return -1;
+
+		int nIndex = -1;
+		for(int i = 0; i < arrayList.size(); ++i)
+		{
+			if(strName == arrayList.get(i).strName && strType == arrayList.get(i).strLayoutName)
+			{
+				nIndex = i;
+				break;
+			}
+		}
+
+		return nIndex;
+	}
+}
