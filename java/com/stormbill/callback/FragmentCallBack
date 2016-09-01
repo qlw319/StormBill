@@ -1,0 +1,11 @@
+package com.stormbill.stormbill.callback;
+
+import android.os.Bundle;
+
+/**
+ * Created by Administrator on 2016/8/19 0019.
+ */
+public interface FragmentCallBack
+{
+	public void callbackFun(Bundle arg);
+}
