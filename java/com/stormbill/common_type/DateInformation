@@ -1,0 +1,28 @@
+package com.stormbill.stormbill.common_type;
+
+public class DateInformation
+{
+	public int nYear;
+	public int nMonth;
+	public int nDay;
+	public double dPay;
+	public double dIncome;
+
+	public DateInformation()
+	{
+		nYear = 0;
+		nMonth = 0;
+		nDay = 0;
+		dPay = 0;
+		dIncome = 0;
+	}
+
+	public void Instead(DateInformation other)
+	{
+		nYear = other.nYear;
+		nMonth = other.nMonth;
+		nDay = other.nDay;
+		dPay = other.dPay;
+		dIncome = other.dIncome;
+	}
+}
