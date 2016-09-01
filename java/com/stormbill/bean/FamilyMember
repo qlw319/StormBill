@@ -1,0 +1,24 @@
+package com.stormbill.stormbill.bean;
+
+/**
+ * Created by Administrator on 2016/9/1 0001.
+ */
+public class FamilyMember
+{
+	private String strMember;
+
+	public FamilyMember()
+	{
+		strMember = "";
+	}
+
+	public String getMember()
+	{
+		return strMember;
+	}
+
+	public void setMember(String strMember)
+	{
+		this.strMember = strMember;
+	}
+}
