@@ -1,0 +1,36 @@
+package com.stormbill.stormbill.adapter;
+
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+
+import java.util.ArrayList;
+
+public class ViewPagerAdapter extends FragmentPagerAdapter
+{
+	private ArrayList<Fragment> mFragmentList;
+
+	public ViewPagerAdapter(FragmentManager fm, ArrayList<Fragment> listView)
+	{
+		super(fm);
+		mFragmentList = listView;
+	}
+
+	@Override
+	public Fragment getItem(int position)
+	{
+		return mFragmentList.get(position);
+	}
+
+	@Override
+	public int getCount()
+	{
+		return mFragmentList.size();
+	}
+
+	@Override
+	public int getItemPosition(Object object)
+	{
+		return super.getItemPosition(object);
+	}
+}
