@@ -15,7 +15,7 @@ public class SQLiteDatabaseManager
 
 	public SQLiteDatabaseManager(Context context)
 	{
-		if(m_bInitialization == false)
+		if(m_bInitialization)
 			return;
 
 		this.Initialization(context);
