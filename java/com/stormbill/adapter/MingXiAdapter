@@ -1,0 +1,25 @@
+package com.stormbill.stormbill.adapter;
+
+import android.content.Context;
+
+import com.stormbill.stormbill.bean.Bean;
+import com.stormbill.stormbill.R;
+
+import java.util.List;
+
+public class MingXiAdapter extends CommonAdapter<Bean>
+{
+	public MingXiAdapter(Context context, int layoutId, List<Bean> datas)
+	{
+		super(context, layoutId, datas);
+	}
+
+	@Override
+	public void convertView(ViewHolder holder, Bean bean)
+	{
+		holder.setText(R.id.id_tv_income_money, bean.str1)
+				.setText(R.id.id_tv_pay_money, bean.str2)
+				.setText(R.id.id_tv_income_remark, bean.str1)
+				.setText(R.id.id_tv_pay_remark, bean.str2);
+	}
+}
