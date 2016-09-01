@@ -1,0 +1,13 @@
+package com.stormbill.stormbill.common;
+
+import android.widget.ImageView;
+import android.widget.TextView;
+
+/**
+ * Created by Administrator on 2016/8/31 0031.
+ */
+public class Common
+{
+	public static TextView mTvType;
+	public static ImageView mImgType;
+}
