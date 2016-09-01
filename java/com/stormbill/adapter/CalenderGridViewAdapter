@@ -1,0 +1,32 @@
+package com.stormbill.stormbill.adapter;
+
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Color;
+import android.util.DisplayMetrics;
+
+import java.util.List;
+import com.stormbill.stormbill.R;
+
+public class CalenderGridViewAdapter extends CommonAdapter<Integer>
+{
+	private Context mContext;
+	public CalenderGridViewAdapter(Context context, int layoutId, List<Integer> datas)
+	{
+		super(context, layoutId, datas);
+		mContext = context;
+	}
+
+	@Override
+	public void convertView(ViewHolder viewHolder, Integer i)
+	{
+		DisplayMetrics metrics = new DisplayMetrics();
+		((Activity)mContext).getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+		viewHolder.setText(R.id.id_day, Integer.toString(i));
+		viewHolder.setTextWidth(R.id.id_day, metrics.widthPixels / 7);
+		viewHolder.setTextHeigh(R.id.id_day, metrics.widthPixels / 7);
+		viewHolder.setTextColor(R.id.id_day, Color.GRAY);
+		viewHolder.setTextBackgroundResource(R.id.id_day, R.drawable.rectangle_calender_write);
+	}
+}
