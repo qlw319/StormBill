@@ -1,0 +1,122 @@
+package com.stormbill.stormbill.adapter;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import com.stormbill.stormbill.view.MyGridView;
+import com.stormbill.stormbill.R;
+
+import java.util.ArrayList;
+
+public class CalenderAdapter extends BaseAdapter implements AdapterView.OnItemClickListener
+{
+	private Context mContext;
+	public TextView mTextView;
+	public int mLastListItemPosition = -1;
+	public int mLastGridItemPosition = -1;
+	public static final int MONTH_COUNT = 25;
+
+	public CalenderAdapter(Context context)
+	{
+		mContext = context;
+	}
+
+	@Override
+	public int getCount()
+	{
+		return MONTH_COUNT;
+	}
+
+	@Override
+	public Object getItem(int i)
+	{
+		return null;
+	}
+
+	@Override
+	public long getItemId(int i)
+	{
+		return 0;
+	}
+
+	@Override
+	public View getView(int position, View view, ViewGroup viewGroup)
+	{
+		MyGridView gridView = null;
+		if(view == null)
+		{
+			view = LayoutInflater.from(mContext).inflate(R.layout.layout_calender, null);
+			gridView = (MyGridView)view.findViewById(R.id.id_gridview);
+			ArrayList<Integer> datas = new ArrayList<>();
+
+			for(int n = 1; n <= 5 * 7; n++)
+				datas.add(n);
+
+			gridView.setAdapter(new CalenderGridViewAdapter(mContext, R.layout.layout_gridview_item, datas));
+			gridView.setOnItemClickListener(this);
+
+			gridView.setTag(position);
+			Log.d("hehe", "setTag " + position);
+		}
+		else
+		{
+			if(mLastListItemPosition != position)
+			{
+				if(mTextView != null)
+				{
+					mTextView.setTextColor(Color.GRAY);
+					mTextView.setBackgroundResource(R.drawable.rectangle_calender_write);
+				}
+
+			}
+			else
+			{
+				if(mTextView != null)
+				{
+					mTextView.setTextColor(Color.WHITE);
+					mTextView.setBackgroundColor(Color.BLUE);
+				}
+			}
+		}
+
+		return view;
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+	{
+		int position = (int)adapterView.getTag();
+		TextView tv = (TextView)view.findViewById(R.id.id_day);
+		if(mLastListItemPosition >= 0 && mLastGridItemPosition >= 0)
+		{
+			if(mLastListItemPosition != position || mLastGridItemPosition != i)
+			{
+				tv.setTextColor(Color.WHITE);
+				tv.setBackgroundColor(Color.BLUE);
+				mTextView.setTextColor(Color.GRAY);
+				mTextView.setBackgroundResource(R.drawable.rectangle_calender_write);
+			}
+			else
+			{
+				tv.setTextColor(Color.WHITE);
+				tv.setBackgroundColor(Color.BLUE);
+			}
+		}
+		else
+		{
+			tv.setTextColor(Color.WHITE);
+			tv.setBackgroundColor(Color.BLUE);
+		}
+
+		mLastGridItemPosition = i;
+		mLastListItemPosition = position;
+		mTextView = tv;
+	}
+}
