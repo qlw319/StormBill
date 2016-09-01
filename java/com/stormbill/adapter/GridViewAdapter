@@ -1,0 +1,24 @@
+package com.stormbill.stormbill.adapter;
+
+import android.content.Context;
+
+import com.stormbill.stormbill.R;
+import com.stormbill.stormbill.bean.GridEntity;
+import com.stormbill.stormbill.common.Common;
+
+import java.util.List;
+
+public class GridViewAdapter extends CommonAdapter<GridEntity>
+{
+	public GridViewAdapter(Context context, int layoutId, List<GridEntity> datas)
+	{
+		super(context, layoutId, datas);
+	}
+
+	@Override
+	public void convertView(ViewHolder viewHolder, GridEntity gridEntity)
+	{
+		viewHolder.setImage(R.id.gridv_img, gridEntity.getImg())
+			.setText(R.id.gridv_text, gridEntity.getType());
+	}
+}
