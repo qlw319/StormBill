@@ -1,0 +1,24 @@
+package com.stormbill.stormbill.common_type;
+
+public class BillTypes
+{
+	public String strName;
+	public String strPicture;
+	public int nBillTypeID;
+
+	public BillTypes()
+	{
+		strName = new String();
+		strPicture = new String();
+		nBillTypeID = 0;
+	}
+
+	public void Instead(BillTypes other)
+	{
+		if(strName != other.strName)
+			strName = other.strName;
+		if(strPicture != other.strPicture)
+			strPicture = other.strPicture;
+		nBillTypeID = other.nBillTypeID;
+	}
+}
