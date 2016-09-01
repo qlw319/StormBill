@@ -1,0 +1,451 @@
+package com.stormbill.stormbill.fg;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CalendarView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.stormbill.stormbill.R;
+import com.stormbill.stormbill.activity.MainActivity;
+import com.stormbill.stormbill.adapter.ViewPagerAdapter;
+import com.stormbill.stormbill.callback.FragmentCallBack;
+import com.stormbill.stormbill.common.Calculator;
+import com.stormbill.stormbill.common.Common;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.TimeZone;
+
+public class FragmentJiYiBi extends Fragment implements View.OnClickListener
+{
+	private FragmentCallBack fragmentCallBack = null;
+	private LayoutInflater mInflater;
+	private View mRootView;
+	private Button mBtnReturn;
+	private Button mBtnIncome;
+	private Button mBtnPay;
+
+	private ViewPagerAdapter mViewPagerAdapter;
+	private ViewPager mViewPager;
+	private ArrayList<Fragment> mFragmentList;
+
+	private View mKeyboard;
+	private LinearLayout mLlMoney;
+	private TextView mTvMoney;
+	private RelativeLayout mLayout;
+	private TextView mTvBigMoney;
+	private TextView mTvSmallMoney;
+	private Calculator mCalculator;
+	private String strMoney = "0.00";
+	private String strBigFormula = "0";
+	private String strSmallFormula = "0";
+
+	private PopupWindow mKeyBoardPopWindow;
+	private Button mBtnAccount;
+	private Button mBtnTime;
+	private Button mBtnMember;
+	private Button mBtnReMark;
+
+	private PopupWindow mCalenderPopWindow;
+
+	private PopupWindow m_MemberPopupWindow;
+	private View m_MemberView;
+	private ListView lv_member_group;
+
+	private PopupWindow m_AccountPopupWindow;
+
+	private View m_AccountView;
+
+	private Calendar calendar;
+	private int year;
+	private int month;
+	private int day;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	{
+		return inflater.inflate(R.layout.fg_jiyibi_addbill, container, false);
+	}
+
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState)
+	{
+		super.onViewCreated(view, savedInstanceState);
+		initViews(view);
+		initDatas();
+		initEvents();
+	}
+
+	@Override
+	public void onHiddenChanged(boolean hidden)
+	{
+		if(!hidden)
+			showKeyBoard(mRootView);
+	}
+
+	private void initViews(View view)
+	{
+		mRootView = view;
+		Common.mTvType = (TextView)view.findViewById(R.id.id_money_type);
+		Common.mImgType = (ImageView)view.findViewById(R.id.id_type_img);
+		mBtnReturn = (Button)view.findViewById(R.id.id_btn_return);
+		mBtnIncome = (Button)view.findViewById(R.id.id_btn_income);
+		mBtnPay = (Button)view.findViewById(R.id.id_btn_pay);
+		mLlMoney = (LinearLayout)view.findViewById(R.id.id_money);
+		mLayout = (RelativeLayout)view.findViewById(R.id.id_calculate_result);
+		mTvMoney = (TextView)view.findViewById(R.id.id_money_number);
+		mTvBigMoney = (TextView)view.findViewById(R.id.id_big_money);
+		mTvSmallMoney = (TextView)view.findViewById(R.id.id_small_money);
+		mViewPager = (ViewPager)view.findViewById(R.id.viewpager);
+		mInflater = LayoutInflater.from(view.getContext());
+
+		mBtnPay.setTextColor(getResources().getColor(R.color.blues));
+		mBtnIncome.setTextColor(getResources().getColor(R.color.black));
+		mBtnPay.setOnClickListener(this);
+		mBtnIncome.setOnClickListener(this);
+		mLlMoney.setOnClickListener(this);
+
+		showKeyBoard(view);
+	}
+
+	private void initDatas()
+	{
+		mFragmentList = new ArrayList<>();
+		FragmentIncomeType fragmentIncomeType = new FragmentIncomeType();
+		FragmentPayType fragmentPayType = new FragmentPayType();
+
+		mFragmentList.add(fragmentIncomeType);
+		mFragmentList.add(fragmentPayType);
+
+		mViewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager(), mFragmentList);
+		mCalculator = new Calculator();
+
+		calendar = Calendar.getInstance();
+		year = calendar.get(Calendar.YEAR);
+		month = calendar.get(Calendar.MONTH);
+		day = calendar.get(Calendar.DAY_OF_MONTH);
+	}
+
+	private void initEvents()
+	{
+		mBtnReturn.setOnClickListener(this);
+		mViewPager.setAdapter(mViewPagerAdapter);
+		mViewPager.setCurrentItem(0);
+		mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
+		{
+			@Override
+			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+			{
+
+			}
+
+			@Override
+			public void onPageSelected(int position)
+			{
+				if(position == 0)
+				{
+					mBtnPay.setTextColor(getResources().getColor(R.color.blues));
+					mBtnIncome.setTextColor(getResources().getColor(R.color.black));
+				}
+				else if(position == 1)
+				{
+					mBtnIncome.setTextColor(getResources().getColor(R.color.blues));
+					mBtnPay.setTextColor(getResources().getColor(R.color.black));
+				}
+			}
+
+			@Override
+			public void onPageScrollStateChanged(int state)
+			{
+
+			}
+		});
+	}
+
+	@Override
+	public void onClick(View view)
+	{
+		switch(view.getId())
+		{
+			case R.id.id_btn_income:
+			{
+				mViewPager.setCurrentItem(1);
+			}
+			break;
+			case R.id.id_btn_pay:
+			{
+				mViewPager.setCurrentItem(0);
+			}
+			break;
+
+			case R.id.id_money:
+			{
+				showKeyBoard(mRootView);
+			}
+			break;
+			case R.id.id_btn_return:
+			{
+				fragmentCallBack.callbackFun(null);
+			}
+			break;
+			case R.id.id_btn_cash:
+			{
+				Log.d("hehe", "id_btn_cash");
+				showAccountPopupWindow(mRootView);
+			}
+			break;
+			case R.id.id_btn_calender:
+			{
+				Log.d("hehe", "id_btn_calender");
+				showCalender(mRootView);
+			}
+			break;
+			case R.id.id_btn_member:
+			{
+				Log.d("hehe", "id_btn_member");
+				showMemberPopupWindow(mRootView);
+			}
+			break;
+			case R.id.id_btn_remark:
+			{
+				Log.d("hehe", "id_btn_remark");
+			}
+			break;
+			case R.id.id_btn_seven:
+			case R.id.id_btn_eight:
+			case R.id.id_btn_nine:
+			case R.id.id_btn_four:
+			case R.id.id_btn_five:
+			case R.id.id_btn_six:
+			case R.id.id_btn_one:
+			case R.id.id_btn_two:
+			case R.id.id_btn_three:
+			case R.id.id_btn_zero:
+			case R.id.id_btn_point:
+			case R.id.id_btn_del:
+			case R.id.id_btn_add:
+			case R.id.id_btn_decrease:
+			{
+				mCalculator.calculate(view.getId());
+				boolean bStartCalculated = mCalculator.isStartCalculate();
+				if(bStartCalculated)
+				{
+					mTvMoney.setVisibility(View.GONE);
+					mLayout.setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					mTvMoney.setVisibility(View.VISIBLE);
+					mLayout.setVisibility(View.GONE);
+				}
+
+				strMoney = mCalculator.getResult();
+				strBigFormula = mCalculator.getResult();
+				strSmallFormula = mCalculator.getFormula();
+
+				mTvMoney.setText(strMoney);
+				mTvBigMoney.setText(strBigFormula);
+				mTvSmallMoney.setText(strSmallFormula);
+			}
+			break;
+			case R.id.id_btn_ac:
+			case R.id.id_btn_ok:
+			{
+				mCalculator.reset();
+
+				strMoney = mCalculator.getResult();
+				strBigFormula = mCalculator.getResult();
+				strSmallFormula = mCalculator.getFormula();
+
+				mTvMoney.setText(strMoney);
+				mTvBigMoney.setText(strBigFormula);
+				mTvSmallMoney.setText(strSmallFormula);
+
+				mTvMoney.setVisibility(View.VISIBLE);
+				mLayout.setVisibility(View.GONE);
+
+				if(view.getId() == R.id.id_btn_ok)
+				{
+					fragmentCallBack.callbackFun(null);
+					mKeyBoardPopWindow.dismiss();
+				}
+			}
+			break;
+			default:
+				break;
+		}
+	}
+
+	@Override
+	public void onAttach(Context context)
+	{
+		super.onAttach(context);
+		fragmentCallBack = (MainActivity)context;
+	}
+
+	public void showKeyBoard(View parent)
+	{
+		if(mKeyBoardPopWindow == null)
+		{
+			mKeyboard = mInflater.inflate(R.layout.fg_jiyibi_calculator, null);
+
+			initKeyBoardPopWindowEvent(mKeyboard);
+			mKeyBoardPopWindow = new PopupWindow(mKeyboard, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		}
+
+		mKeyBoardPopWindow.setOutsideTouchable(true);
+		mKeyBoardPopWindow.setFocusable(true);
+		mKeyBoardPopWindow.showAtLocation(parent, Gravity.BOTTOM, 0, 0);
+		mKeyBoardPopWindow.setAnimationStyle(R.style.popwindow_anim_style);
+	}
+
+	private void initKeyBoardPopWindowEvent(View view)
+	{
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+		SimpleDateFormat sfYear = new SimpleDateFormat("M月d日");
+		String strTime = sfYear.format(calendar.getTime());
+
+		Button btn = (Button)view.findViewById(R.id.id_btn_calender);
+		btn.setText(strTime);
+		btn.setOnClickListener(this);
+
+		view.findViewById(R.id.id_btn_cash).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_member).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_remark).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_seven).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_eight).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_nine).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_four).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_five).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_six).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_one).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_two).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_three).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_zero).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_ac).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_point).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_del).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_add).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_decrease).setOnClickListener(this);
+		view.findViewById(R.id.id_btn_ok).setOnClickListener(this);
+	}
+
+	private void showAccountPopupWindow(View parent)
+	{
+		if(m_AccountPopupWindow == null)
+		{
+			m_AccountView = mInflater.inflate(R.layout.group_list, null);
+			TextView tv = (TextView)m_AccountView.findViewById(R.id.title);
+			tv.setText("选择账户");
+			tv.setTextSize(20);
+			lv_member_group = (ListView)m_AccountView.findViewById(R.id.lvGroup);
+			m_AccountPopupWindow = new PopupWindow(m_AccountView, LinearLayout.LayoutParams.MATCH_PARENT, 500);
+		}
+
+		m_AccountPopupWindow.setFocusable(true);
+		m_AccountPopupWindow.setOutsideTouchable(true);
+		m_AccountPopupWindow.showAtLocation(parent, Gravity.BOTTOM, 0, 0);
+
+		lv_member_group.setOnItemClickListener(new AdapterView.OnItemClickListener()
+		{
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+			{
+				if(m_AccountPopupWindow != null)
+					m_AccountPopupWindow.dismiss();
+			}
+		});
+	}
+
+	private void showCalender(View parent)
+	{
+		if(mCalenderPopWindow == null)
+		{
+			View calender = mInflater.inflate(R.layout.layout_calender_view, null);
+			CalendarView calendarView = (CalendarView)calender.findViewById(R.id.calendarView);
+			calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener()
+			{
+				@Override
+				public void onSelectedDayChange(CalendarView calendarView, int i, int i1, int i2)
+				{
+					String strTime = Integer.toString(i1 + 1) + "月" + Integer.toString(i2) + "日";
+					year = i;
+					month = i1 + 1;
+					day = i2;
+
+					Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+
+					if(calendar.get(Calendar.YEAR) < year)
+					{
+						Toast.makeText(mInflater.getContext(), "日期不能超过今年", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					else if(Calendar.YEAR >= year && calendar.get(Calendar.MONTH) + 1 < month)
+					{
+						Toast.makeText(mInflater.getContext(), "日期不能超过当月", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					else if(Calendar.YEAR >= year && calendar.get(Calendar.MONTH) + 1 >= month && calendar.get(Calendar.DATE) < day)
+					{
+						Toast.makeText(mInflater.getContext(), "日期不能超过今天", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					else
+					{
+						Toast.makeText(mInflater.getContext(), "选择了: " + year + "年" + month + "月" + day + "日", Toast.LENGTH_SHORT).show();
+						mBtnTime.setText(strTime);
+						mCalenderPopWindow.dismiss();
+					}
+				}
+			});
+			mCalenderPopWindow = new PopupWindow(calender, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+		}
+
+		mCalenderPopWindow.setOutsideTouchable(true);
+		mCalenderPopWindow.setFocusable(true);
+		mCalenderPopWindow.showAtLocation(parent, Gravity.BOTTOM, 0, 0);
+		mCalenderPopWindow.setAnimationStyle(R.style.popwindow_anim_style);
+	}
+
+	private void showMemberPopupWindow(View parent)
+	{
+		if(m_MemberPopupWindow == null)
+		{
+			m_MemberView = mInflater.inflate(R.layout.group_list, null);
+			TextView tv = (TextView)m_MemberView.findViewById(R.id.title);
+			tv.setText("成员");
+			lv_member_group = (ListView)m_MemberView.findViewById(R.id.lvGroup);
+			m_MemberPopupWindow = new PopupWindow(m_MemberView, LinearLayout.LayoutParams.MATCH_PARENT, 500);
+		}
+
+		m_MemberPopupWindow.setFocusable(true);
+		m_MemberPopupWindow.setOutsideTouchable(true);
+		m_MemberPopupWindow.showAtLocation(parent, Gravity.BOTTOM, 0, 0);
+
+		lv_member_group.setOnItemClickListener(new AdapterView.OnItemClickListener()
+		{
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+			{
+				if(m_MemberPopupWindow != null)
+					m_MemberPopupWindow.dismiss();
+			}
+		});
+	}
+}
