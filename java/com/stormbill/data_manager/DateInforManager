@@ -1,0 +1,273 @@
+package com.stormbill.stormbill.data_manager;
+
+import com.stormbill.stormbill.common_type.DateInformation;
+import com.stormbill.stormbill.common_type.IncomeAndPay;
+import com.stormbill.stormbill.common_type.RecordItemDetails;
+import com.stormbill.stormbill.datastructs.ControlCenter;
+
+import java.util.ArrayList;
+
+public class DateInforManager
+{
+	public static boolean ImportDateInfo()
+	{
+		ArrayList<RecordItemDetails> arrRecordItemList = ControlCenter.GetRecordItemDetails();
+		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
+		if(arrDateInfoList == null || arrDateInfoList == null)
+			return false;
+
+		int nLastRecordYear = 0;
+		int nLastRecordMonth = 0;
+		int nLastRecordDay = 0;
+		double dIncome = 0;
+		double dPay = 0;
+
+		for(int i = 0; i < arrRecordItemList.size(); ++i)
+		{
+			RecordItemDetails tmp = arrRecordItemList.get(i);
+			if(i == 0)
+			{
+				nLastRecordYear = tmp.nYear;
+				nLastRecordMonth = tmp.nMonth;
+				nLastRecordDay = tmp.nDay;
+
+				DateInformation item = new DateInformation();
+				item.nYear = tmp.nYear;
+				item.nMonth = tmp.nMonth;
+				item.nDay = tmp.nDay;
+				arrDateInfoList.add(item);
+			}
+
+			if(tmp.nYear == nLastRecordYear && tmp.nMonth != nLastRecordMonth && tmp.nDay == nLastRecordDay)
+			{
+				dIncome += tmp.dIncomeMoney;
+				dPay += tmp.dPayMoney;
+				continue;
+			}
+
+			//
+			DateInformation prev = arrDateInfoList.get(arrDateInfoList.size() - 1);
+			prev.dPay = dPay;
+			prev.dIncome = dIncome;
+			dIncome = 0;
+			dPay = 0;
+
+			//
+			DateInformation item = new DateInformation();
+			item.nYear = tmp.nYear;
+			item.nMonth = tmp.nMonth;
+			item.nDay = tmp.nDay;
+			arrDateInfoList.add(item);
+		}
+
+		//
+		if(arrRecordItemList.size() > 0)
+		{
+			DateInformation prev = arrDateInfoList.get(arrDateInfoList.size() - 1);
+			prev.dPay = dPay;
+			prev.dIncome = dIncome;
+		}
+
+		return true;
+	}
+
+	public static boolean AddSingleRecordItem(RecordItemDetails item)
+	{
+		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
+		if(arrDateInfoList == null)
+			return false;
+
+		DateInformation dateInformation = GetDateInforByDate(item.nYear, item.nMonth, item.nDay);
+		if(dateInformation == null)
+		{
+			DateInformation records = new DateInformation();
+			records.nYear = item.nYear;
+			records.nMonth = item.nMonth;
+			records.nDay = item.nDay;
+			records.dPay = item.dPayMoney;
+			records.dIncome = item.dIncomeMoney;
+			arrDateInfoList.add(records);
+		}
+		else
+		{
+			dateInformation.dPay += item.dPayMoney;
+			dateInformation.dIncome += item.dIncomeMoney;
+		}
+
+		return true;
+	}
+
+	public static boolean DeleteSingleRecordItem(RecordItemDetails item)
+	{
+		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
+		if(arrDateInfoList == null)
+			return false;
+
+		DateInformation dateInformation = GetDateInforByDate(item.nYear, item.nMonth, item.nDay);
+		if(dateInformation == null)
+			return false;
+
+		dateInformation.dPay -= item.dPayMoney;
+		dateInformation.dIncome -= item.dIncomeMoney;
+		OrderDateInformation();
+		return true;
+	}
+
+	public static boolean ModifySingleRecordItem(RecordItemDetails itemBefore, RecordItemDetails itemAfter)
+	{
+		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
+		if(arrDateInfoList == null)
+			return false;
+
+		DateInformation dateInformation = GetDateInforByDate(itemBefore.nYear, itemBefore.nMonth, itemBefore.nDay);
+		if(dateInformation == null)
+			return false;
+
+		if(itemAfter.nYear == itemBefore.nYear && itemAfter.nMonth == itemBefore.nMonth && itemAfter.nDay == itemBefore.nDay)
+		{
+			dateInformation.dPay += itemAfter.dPayMoney - itemBefore.dPayMoney;
+			dateInformation.dIncome += itemAfter.dIncomeMoney - itemBefore.dIncomeMoney;
+		}
+		else
+		{
+			DeleteSingleRecordItem(itemBefore);
+			AddSingleRecordItem(itemAfter);
+		}
+
+		return true;
+	}
+
+	private static void OrderDateInformation()
+	{
+		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
+		if(arrDateInfoList == null)
+			return;
+
+		// 这样写会不会导致越界访问？待究
+		for(int i = 0; i < arrDateInfoList.size(); ++i)
+		{
+			DateInformation tmp = arrDateInfoList.get(i);
+			if(tmp.dPay <= 0 && tmp.dIncome <= 0)
+				arrDateInfoList.remove(i);
+		}
+
+		// 排序
+		QuickSort(arrDateInfoList, 0, arrDateInfoList.size() - 1);
+	}
+
+	public static DateInformation GetDateInforByDate(int nYear, int nMonth, int nDay)
+	{
+		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
+		if(arrDateInfoList == null)
+			return null;
+
+		for(int i = 0; i < arrDateInfoList.size(); ++i)
+		{
+			DateInformation tmp = arrDateInfoList.get(i);
+			if(tmp.nYear != nYear || tmp.nMonth != nMonth || tmp.nDay != nDay)
+				continue;
+
+			return tmp;
+		}
+
+		return null;
+	}
+
+	// 获取指定日期（年月日）的收支总帐
+	public static IncomeAndPay GetSpecifyDayIncomeAndPay(int nYear, int nMonth, int nDay)
+	{
+		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
+		if(arrDateInfoList == null)
+			return null;
+
+		IncomeAndPay moneyChange = null;
+		for(int i = 0; i < arrDateInfoList.size(); ++i)
+		{
+			DateInformation tmp = arrDateInfoList.get(i);
+			if(tmp.nYear != nYear || tmp.nMonth != nMonth || tmp.nDay != nDay)
+				continue;
+
+			moneyChange = new IncomeAndPay();
+			moneyChange.dPay = tmp.dPay;
+			moneyChange.dIncome = tmp.dIncome;
+			break;
+		}
+
+		return moneyChange;
+	}
+
+	public static IncomeAndPay GetLastMonthIncomeAndPay(int nYear, int nMonth)
+	{
+		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
+		if(arrDateInfoList == null)
+			return null;
+
+		IncomeAndPay moneyChange = null;
+		for(int i = 0; i < arrDateInfoList.size(); ++i)
+		{
+			DateInformation tmp = arrDateInfoList.get(i);
+			if(tmp.nYear != nYear || tmp.nMonth != nMonth)
+				continue;
+
+			if(moneyChange == null)
+				moneyChange = new IncomeAndPay();
+			moneyChange.dPay += tmp.dPay;
+			moneyChange.dIncome += tmp.dIncome;
+		}
+
+		return moneyChange;
+	}
+
+	// 对数据库中加载出来的数据进行快速排序，排序是按时间从前到后排列
+	private static void QuickSort(ArrayList<DateInformation> compare, int left, int right)
+	{
+		int dp;
+		if(left < right)
+		{
+			dp = Partition(compare, left, right);
+			QuickSort(compare, left, dp - 1);
+			QuickSort(compare, dp + 1, right);
+		}
+	}
+
+	// 快速排序中需要用到的划分边界的函数
+	private static int Partition(ArrayList<DateInformation> arrItemsList, int left, int right)
+	{
+		DateInformation pivot = arrItemsList.get(left);
+		while(left < right)
+		{
+			while(left < right && DateTimeCompare(arrItemsList.get(right), pivot))
+				right--;
+			if(left < right)
+				arrItemsList.get(left++).Instead(arrItemsList.get(right));
+			while(left < right && DateTimeCompare(arrItemsList.get(left), pivot))
+				left++;
+			if(left < right)
+				arrItemsList.get(right--).Instead(arrItemsList.get(left));
+		}
+
+		arrItemsList.get(left).Instead(pivot);
+		return left;
+	}
+
+	// 决定详细数据排列的方式，按时间的从最近到最久的顺序
+	private static boolean DateTimeCompare(DateInformation first, DateInformation second)
+	{
+		if(first.nYear > second.nYear)
+			return true;
+		else if(second.nYear > first.nYear)
+			return false;
+
+		if(first.nMonth > second.nMonth)
+			return true;
+		else if(second.nMonth > first.nMonth)
+			return false;
+
+		if(first.nDay > second.nDay)
+			return true;
+		else if(second.nDay > first.nDay)
+			return false;
+
+		return true;
+	}
+}
