@@ -1,0 +1,28 @@
+package com.stormbill.stormbill.common_type;
+
+public class WalletTypes
+{
+	public String strName;
+	public String strLayoutName;
+	public String strColor;
+	public int nWalletTypeID;
+
+	public WalletTypes()
+	{
+		strName = new String();
+		strLayoutName = new String();
+		strColor = new String();
+		nWalletTypeID = 0;
+	}
+
+	public void Instead(WalletTypes other)
+	{
+		if(strName != other.strName)
+			strName = other.strName;
+		if(strLayoutName != other.strLayoutName)
+			strLayoutName = other.strLayoutName;
+		if(strColor != other.strColor)
+			strColor = other.strColor;
+		nWalletTypeID = other.nWalletTypeID;
+	}
+}
