@@ -1,0 +1,30 @@
+package com.stormbill.stormbill.adapter;
+
+import android.content.Context;
+
+import com.stormbill.stormbill.R;
+import com.stormbill.stormbill.bean.AccountType;
+
+import java.util.List;
+
+public class AccountGroupAdapter extends CommonAdapter<AccountType>
+{
+	private Context mContext;
+	private List<AccountType> mList;
+
+	public AccountGroupAdapter(Context context, int layoutId, List<AccountType> datas)
+	{
+		super(context, layoutId, datas);
+
+		this.mContext = context;
+		this.mList = datas;
+	}
+
+	@Override
+	public void convertView(ViewHolder viewHolder, AccountType accountType)
+	{
+		viewHolder.setImage(R.id.image, accountType.getImg())
+				.setText(R.id.up_text, accountType.getUpText())
+				.setText(R.id.down_text, accountType.getDownText());
+	}
+}
