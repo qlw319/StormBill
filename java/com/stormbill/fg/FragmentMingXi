@@ -1,0 +1,76 @@
+package com.stormbill.stormbill.fg;
+
+import android.support.v4.app.Fragment;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListView;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.stormbill.stormbill.bean.Bean;
+import com.stormbill.stormbill.adapter.MingXiAdapter;
+import com.stormbill.stormbill.R;
+
+public class FragmentMingXi extends Fragment
+{
+	private ListView 			mListView;
+	private MingXiAdapter 		mAdapter;
+	private LayoutInflater 		mInflater;
+	private View				mHeaderView;
+	private View 				mFooterView;
+	private View				mSearchView;
+	private View				mTitleView;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	{
+		mInflater = inflater;
+		return inflater.inflate(R.layout.fg_mingxi, container, false);
+	}
+
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState)
+	{
+		super.onViewCreated(view, savedInstanceState);
+		initViews(view);
+		initDatas();
+		initEvents();
+	}
+
+	private void initViews(View view)
+	{
+		mListView = (ListView)view.findViewById(R.id.fg_mingxi_listView);
+
+		mSearchView = view.findViewById(R.id.id_fg_search);
+		mTitleView = view.findViewById(R.id.id_fg_title);
+
+		mHeaderView = mInflater.inflate(R.layout.fg_mingxi_item_header, mListView, false);
+		mFooterView = mInflater.inflate(R.layout.fg_mingxi_item_footer, mListView, false);
+
+		mListView.addHeaderView(mHeaderView);
+		mListView.addFooterView(mFooterView);
+	}
+
+	private void initDatas()
+	{
+		// test data
+		Bean bean = new Bean();
+		List<Bean> beanList = new ArrayList<>();
+		for(int i = 0; i < 20; i++)
+		{
+			bean.type = i % 2;
+			beanList.add(bean);
+		}
+
+		mAdapter = new MingXiAdapter(mInflater.getContext() ,R.layout.fg_mingxi_item, beanList);
+	}
+
+	private void initEvents()
+	{
+		mListView.setAdapter(mAdapter);
+		mAdapter.notifyDataSetChanged();
+		mListView.setOverScrollMode(View.OVER_SCROLL_NEVER);// 去掉回弹阴影效果
+	}
+}
