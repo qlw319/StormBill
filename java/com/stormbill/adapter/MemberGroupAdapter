@@ -1,0 +1,29 @@
+package com.stormbill.stormbill.adapter;
+
+import android.content.Context;
+import android.graphics.Color;
+
+import com.stormbill.stormbill.R;
+
+import java.util.List;
+
+public class MemberGroupAdapter extends CommonAdapter<String>
+{
+	private Context mContext;
+	private List<String> mList;
+
+	public MemberGroupAdapter(Context context, int layoutId, List<String> datas)
+	{
+		super(context, layoutId, datas);
+
+		this.mContext = context;
+		this.mList = datas;
+	}
+
+	@Override
+	public void convertView(ViewHolder viewHolder, String s)
+	{
+		viewHolder.setTextColor(R.id.groupItem, Color.BLACK);
+		viewHolder.setText(R.id.groupItem, s);
+	}
+}
