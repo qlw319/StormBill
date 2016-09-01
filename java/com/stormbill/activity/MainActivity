@@ -1,0 +1,311 @@
+package com.stormbill.stormbill.activity;
+
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.stormbill.stormbill.R;
+import com.stormbill.stormbill.callback.FragmentCallBack;
+import com.stormbill.stormbill.datastructs.ControlCenter;
+import com.stormbill.stormbill.fg.FragmentAccount;
+import com.stormbill.stormbill.fg.FragmentJiYiBi;
+import com.stormbill.stormbill.fg.FragmentMingXi;
+
+public class MainActivity extends FragmentActivity implements View.OnTouchListener, FragmentCallBack
+{
+	private LinearLayout mTabBar;
+	private LinearLayout mTabBar1;
+	private LinearLayout mTabBar2;
+	private LinearLayout mTabBar3;
+	private LinearLayout mTabBar4;
+	private LinearLayout mTabBar5;
+
+	private ImageView mImgView1;
+	private ImageView mImgView2;
+	private ImageView mImgView3;
+	private ImageView mImgView4;
+	private ImageView mImgView5;
+
+	private TextView mText1;
+	private TextView mText2;
+	//	private TextView mText3;
+	private TextView mText4;
+	private TextView mText5;
+
+	private Fragment mFragmentMingXiPage;
+	private Fragment mFragmentJiYiBiPage;
+	private Fragment mFragmentAccountPage;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+
+		ControlCenter.Initialization(MainActivity.this);
+		initView();
+		initEvents();
+	}
+
+	private void initView()
+	{
+		mTabBar = (LinearLayout)findViewById(R.id.id_tab_bar);
+
+		mTabBar1 = (LinearLayout)findViewById(R.id.id_tab1);
+		mTabBar2 = (LinearLayout)findViewById(R.id.id_tab2);
+		mTabBar3 = (LinearLayout)findViewById(R.id.id_tab3);
+		mTabBar4 = (LinearLayout)findViewById(R.id.id_tab4);
+		mTabBar5 = (LinearLayout)findViewById(R.id.id_tab5);
+
+		mImgView1 = (ImageView)findViewById(R.id.id_tab1_imageView);
+		mImgView2 = (ImageView)findViewById(R.id.id_tab2_imageView);
+		mImgView3 = (ImageView)findViewById(R.id.id_tab3_imageView);
+		mImgView4 = (ImageView)findViewById(R.id.id_tab4_imageView);
+		mImgView5 = (ImageView)findViewById(R.id.id_tab5_imageView);
+
+		mText1 = (TextView)findViewById(R.id.id_tab1_textView);
+		mText2 = (TextView)findViewById(R.id.id_tab2_textView);
+
+		mText4 = (TextView)findViewById(R.id.id_tab4_textView);
+		mText5 = (TextView)findViewById(R.id.id_tab5_textView);
+
+		resetImg();
+		setSelect(0);
+	}
+
+	private void initEvents()
+	{
+		mTabBar1.setOnTouchListener(this);
+		mTabBar2.setOnTouchListener(this);
+		mTabBar3.setOnTouchListener(this);
+		mTabBar4.setOnTouchListener(this);
+		mTabBar5.setOnTouchListener(this);
+	}
+
+	@Override
+	public boolean onTouch(View view, MotionEvent motionEvent)
+	{
+		resetImg();
+		switch(motionEvent.getAction())
+		{
+			case MotionEvent.ACTION_DOWN://按下
+			{
+				switch(view.getId())
+				{
+					case R.id.id_tab1:
+					{
+						mImgView1.setBackgroundResource(R.drawable.circle_greed);
+						mText1.setTextColor(Color.GREEN);
+					}
+					break;
+					case R.id.id_tab2:
+					{
+						mImgView2.setBackgroundResource(R.drawable.circle_greed);
+						mText2.setTextColor(Color.GREEN);
+					}
+					break;
+					case R.id.id_tab3:
+					{
+						mImgView3.setBackgroundResource(R.drawable.circle_greed);
+					}
+					break;
+					case R.id.id_tab4:
+					{
+						mImgView4.setBackgroundResource(R.drawable.circle_greed);
+						mText4.setTextColor(Color.GREEN);
+					}
+					break;
+					case R.id.id_tab5:
+					{
+						mImgView5.setBackgroundResource(R.drawable.circle_greed);
+						mText5.setTextColor(Color.GREEN);
+					}
+					break;
+					default:
+						break;
+				}
+			}
+			break;
+			case MotionEvent.ACTION_UP://放手
+			{
+				switch(view.getId())
+				{
+					case R.id.id_tab1:
+					{
+						mImgView1.setBackgroundResource(R.drawable.circle_blue);
+						mText1.setTextColor(Color.BLUE);
+						setSelect(0);
+					}
+					break;
+					case R.id.id_tab2:
+					{
+						mImgView2.setBackgroundResource(R.drawable.circle_blue);
+						mText2.setTextColor(Color.BLUE);
+						setSelect(1);
+					}
+					break;
+					case R.id.id_tab3:
+					{
+						mImgView3.setBackgroundResource(R.drawable.circle_blue);
+						setSelect(2);
+					}
+					break;
+					case R.id.id_tab4:
+					{
+						mImgView4.setBackgroundResource(R.drawable.circle_blue);
+						mText4.setTextColor(Color.BLUE);
+						setSelect(3);
+					}
+					break;
+					case R.id.id_tab5:
+					{
+						mImgView5.setBackgroundResource(R.drawable.circle_blue);
+						mText5.setTextColor(Color.BLUE);
+						setSelect(4);
+					}
+					break;
+					default:
+						break;
+				}
+			}
+			break;
+
+			default:
+				break;
+		}
+		return true;
+	}
+
+	public void setSelect(int i)
+	{
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		HideFragment(fragmentTransaction);
+		switch(i)
+		{
+			case 0:
+			{
+				if(mFragmentMingXiPage == null)
+				{
+					mFragmentMingXiPage = new FragmentMingXi();
+					fragmentTransaction.add(R.id.id_content, mFragmentMingXiPage);
+				}
+				else
+					fragmentTransaction.show(mFragmentMingXiPage);
+
+				mTabBar.setVisibility(View.VISIBLE);
+				mImgView1.setBackgroundResource(R.drawable.circle_blue);
+				mText1.setTextColor(Color.BLUE);
+			}
+			break;
+
+			case 1:
+			{
+				if(mFragmentAccountPage == null)
+				{
+					mFragmentAccountPage = new FragmentAccount();
+					fragmentTransaction.add(R.id.id_content, mFragmentAccountPage);
+				}
+				else
+					fragmentTransaction.show(mFragmentAccountPage);
+
+				mImgView2.setBackgroundResource(R.drawable.circle_blue);
+				mText2.setTextColor(Color.BLUE);
+
+			}
+			break;
+			case 2:
+			{
+				if(mFragmentJiYiBiPage == null)
+				{
+					mFragmentJiYiBiPage = new FragmentJiYiBi();
+					fragmentTransaction.add(R.id.id_content, mFragmentJiYiBiPage);
+				}
+				else
+					fragmentTransaction.show(mFragmentJiYiBiPage);
+
+				mTabBar.setVisibility(View.GONE);
+			}
+			break;
+			default:
+				break;
+		}
+
+		fragmentTransaction.commit();
+		fragmentManager.executePendingTransactions();
+	}
+
+	private void HideFragment(FragmentTransaction fragmentTransaction)
+	{
+		if(mFragmentMingXiPage != null)
+		{
+			fragmentTransaction.hide(mFragmentMingXiPage);
+		}
+
+		if(mFragmentAccountPage != null)
+		{
+			fragmentTransaction.hide(mFragmentAccountPage);
+		}
+
+		if(mFragmentJiYiBiPage != null)
+		{
+			fragmentTransaction.hide(mFragmentJiYiBiPage);
+		}
+	}
+
+	void resetImg()
+	{
+		mImgView1.setBackgroundResource(R.drawable.circle_gray);
+		mText1.setTextColor(Color.GRAY);
+
+		mImgView2.setBackgroundResource(R.drawable.circle_gray);
+		mText2.setTextColor(Color.GRAY);
+
+		mImgView3.setBackgroundResource(R.drawable.circle_gray);
+
+		mImgView4.setBackgroundResource(R.drawable.circle_gray);
+		mText4.setTextColor(Color.GRAY);
+
+		mImgView5.setBackgroundResource(R.drawable.circle_gray);
+		mText5.setTextColor(Color.GRAY);
+	}
+
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+	}
+
+	@Override
+	public void onStop()
+	{
+		super.onStop();
+	}
+
+	@Override
+	public void callbackFun(Bundle arg)
+	{
+		resetImg();
+		setSelect(0);
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		if(mFragmentJiYiBiPage != null && mFragmentJiYiBiPage.isVisible())
+		{
+			resetImg();
+			setSelect(0);
+		}
+		else
+			this.finish();
+	}
+}
