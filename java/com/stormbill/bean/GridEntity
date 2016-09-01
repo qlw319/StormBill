@@ -1,0 +1,36 @@
+package com.stormbill.stormbill.bean;
+
+/**
+ * Created by Administrator on 2016/8/19 0019.
+ */
+public class GridEntity
+{
+	private int mImg;
+	private String mType;
+
+	public GridEntity(int img, String type)
+	{
+		this.mImg = img;
+		this.mType = type;
+	}
+
+	public int getImg()
+	{
+		return mImg;
+	}
+
+	public void setImg(int img)
+	{
+		this.mImg = img;
+	}
+
+	public String getType()
+	{
+		return mType;
+	}
+
+	public void setTypes(String type)
+	{
+		this.mType = type;
+	}
+}
