@@ -1,0 +1,77 @@
+package com.stormbill.stormbill.common;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.TimeZone;
+
+public class BillCalender
+{
+	private int mCount = 0;
+	public BillCalender(int count)
+	{
+		mCount = count;
+	}
+
+	public void getCurYearAndMonth(int position, int count, String year, String month)
+	{
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+		int curDay = calendar.get(Calendar.DAY_OF_MONTH); // 当前几号
+		calendar.add(Calendar.MONTH, position - mCount);
+		calendar.add(Calendar.DATE, 1 - curDay);
+		SimpleDateFormat sfYear = new SimpleDateFormat("yyyy");
+		year = sfYear.format(calendar.getTime());
+		SimpleDateFormat sfMonth = new SimpleDateFormat("M");
+		month = sfMonth.format(calendar.getTime());
+	}
+
+	public void getCalender(int position, ArrayList<Integer> datas)
+	{
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+		int curDay = calendar.get(Calendar.DAY_OF_MONTH); // 当前几号
+		calendar.add(Calendar.MONTH, position + 1 - mCount );
+		calendar.add(Calendar.DATE, 1 - curDay);
+
+		int day_of_week = calendar.get(Calendar.DAY_OF_WEEK);// 每月1号是周几
+		day_of_week -= 1;
+		switch(day_of_week)
+		{
+			case 0:
+				break;
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			{
+				calendar.add(Calendar.DATE, -day_of_week-1);
+				for(int i = 0 ; i <= day_of_week; i++)
+				{
+					calendar.add(Calendar.DATE, +1);
+					int day = calendar.get(Calendar.DAY_OF_MONTH); // 当前几号
+					datas.add(day);
+				}
+			}
+			break;
+		}
+
+		int lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);    //获取本月最大天数
+		int curCount = datas.size();
+		int needDays;
+		if(day_of_week == 0)
+			calendar.add(Calendar.DATE, -1);
+
+		if(35 - curCount < lastDay)
+			needDays = 42 - curCount;
+		else
+			needDays = 35 - curCount;
+
+		for(int i = 0; i < needDays; i++)
+		{
+			calendar.add(Calendar.DATE, +1);
+			int day = calendar.get(Calendar.DAY_OF_MONTH); // 当前几号
+			datas.add(day);
+		}
+	}
+}
