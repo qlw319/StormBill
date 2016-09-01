@@ -1,0 +1,292 @@
+package com.stormbill.stormbill.common;
+
+import android.icu.text.LocaleDisplayNames;
+import android.util.Log;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+
+import com.stormbill.stormbill.R;
+
+public class Calculator
+{
+	private String strResult;		// 结果数
+	private String strLeft;			// 小数点左边
+	private String strRight;		// 小数点右边
+	private String strRight1;		// 小数点右边第一个数
+	private String strRight2;		// 小数点右边第二个数
+	private boolean bHavePoint;		// 小数点
+
+	private String strFormula;		// 计算公式
+	private boolean bStartCalculate;// 开始公式计算
+	private int nCount;	// 符号输入个数
+	public Calculator()
+	{
+		reset();
+	}
+
+	public String getResult()
+	{
+		if(bStartCalculate)
+			return strResult;
+		else
+			calculateResult();
+		return  strResult;
+	}
+
+	private void calculateResult()
+	{
+		strResult = strLeft + "." + strRight1 + strRight2;
+	}
+
+	public String getFormula()
+	{
+		return strFormula;
+	}
+
+	public boolean isStartCalculate()
+	{
+		return bStartCalculate;
+	}
+
+	public void reset()
+	{
+		strResult = "";
+		strLeft = "0";
+		strRight = "";
+		strRight1 = "0";
+		strRight2 = "0";
+		bHavePoint = false;
+
+		strFormula = "";
+		bStartCalculate = false;
+		nCount = 0;
+	}
+
+	public void calculate(int id)
+	{
+		switch(id)
+		{
+			case R.id.id_btn_zero:
+			{
+				calculateNumber("0");
+				checkFormulaAndCalculate("0");
+			}
+			break;
+			case R.id.id_btn_one:
+			{
+				calculateNumber("1");
+				checkFormulaAndCalculate("1");
+			}
+			break;
+			case R.id.id_btn_two:
+			{
+				calculateNumber("2");
+				checkFormulaAndCalculate("2");
+			}
+			break;
+			case R.id.id_btn_three:
+			{
+				calculateNumber("3");
+				checkFormulaAndCalculate("3");
+			}
+			break;
+			case R.id.id_btn_four:
+			{
+				calculateNumber("4");
+				checkFormulaAndCalculate("4");
+			}
+			break;
+			case R.id.id_btn_five:
+			{
+				calculateNumber("5");
+				checkFormulaAndCalculate("5");
+			}
+			break;
+			case R.id.id_btn_six:
+			{
+				calculateNumber("6");
+				checkFormulaAndCalculate("6");
+			}
+			break;
+			case R.id.id_btn_seven:
+			{
+				calculateNumber("7");
+				checkFormulaAndCalculate("7");
+			}
+			break;
+			case R.id.id_btn_eight:
+			{
+				calculateNumber("8");
+				checkFormulaAndCalculate("8");
+			}
+			break;
+			case R.id.id_btn_nine:
+			{
+				calculateNumber("9");
+				checkFormulaAndCalculate("9");
+			}
+			break;
+			case R.id.id_btn_point:
+			{
+				bHavePoint = true;
+				checkFormulaAndCalculate(".");
+			}
+			break;
+			case R.id.id_btn_del:
+			{
+				delete();
+			}
+			break;
+			case R.id.id_btn_add:
+			{
+				if(!bStartCalculate)
+				{
+					strFormula = strLeft;
+					strRight = strRight1 + strRight2;
+					bStartCalculate = true;
+				}
+				checkFormulaAndCalculate("+");
+			}
+			break;
+			case R.id.id_btn_decrease:
+			{
+				if(!bStartCalculate)
+				{
+					strFormula = strLeft;
+					strRight = strRight1 + strRight2;
+					bStartCalculate = true;
+				}
+				checkFormulaAndCalculate("-");
+			}
+			break;
+			default:
+				break;
+		}
+
+	}
+
+	private void calculateNumber(String strNum)
+	{
+		if(bHavePoint)
+		{
+			if(strRight.length() == 0)
+			{
+				strRight1 = strNum;
+				strRight += strNum;
+			}
+			else if(strRight.length() == 1)
+			{
+				strRight2 = strNum;
+				strRight += strNum;
+			}
+		}
+		else
+		{
+			if(bStartCalculate)
+				return;
+
+			if(strLeft.isEmpty() && strNum != "0")
+				strLeft += strNum;
+			else if(!strLeft.isEmpty() && strLeft.equals("0"))
+				strLeft = strNum;
+			else
+				strLeft += strNum;
+		}
+	}
+
+	private void checkFormulaAndCalculate(String strInput)
+	{
+		if(strLeft.isEmpty())
+			return;
+
+		if(strInput.matches("(\\+)|(\\-)"))
+			bStartCalculate = true;
+
+		if(strInput.matches("(\\+)|(\\-)|(\\.)"))
+		{
+			String strTemp = strFormula.substring(strFormula.length() - 1, strFormula.length());
+			if(strTemp.equals(strInput))
+				return;
+		}
+
+		strFormula += strInput;
+		formulaCalculate();
+	}
+
+	private void formulaCalculate()
+	{
+		ArrayList<String> listNumber = new ArrayList<String>();
+		ArrayList<String> listOperator = new ArrayList<String>();
+
+		double dSum = 0f;
+		String strFormulaTemp = strFormula;
+
+		String strTemp = strFormulaTemp.substring(strFormulaTemp.length() - 1);
+		if(strTemp.equals(".") || strTemp.equals("+") || strTemp.equals("-"))
+			strFormulaTemp = strFormulaTemp.substring(0, strFormulaTemp.length() - 1);
+
+		String strNum = "";
+
+		for (int i = 0; i < strFormulaTemp.length(); i++)
+		{
+			strTemp = strFormulaTemp.substring(i, i + 1);
+
+			if(strTemp.equals("+"))
+			{
+				listOperator.add("+");
+				listNumber.add(strNum);
+				strNum = "";
+			}
+			else if(strTemp.equals("-"))
+			{
+				listOperator.add("-");
+				listNumber.add(strNum);
+				strNum = "";
+			}
+			else
+			{
+				strNum += strTemp;
+			}
+		}
+
+		listNumber.add(strNum);
+
+		dSum += Double.valueOf(listNumber.get(0));
+		for(int x = 0; x < listOperator.size(); x++)
+		{
+			if(listOperator.get(x).equals("+"))
+				dSum += Double.valueOf(listNumber.get(x+1));
+			else if(listOperator.get(x).equals("-"))
+				dSum -= Double.valueOf(listNumber.get(x+1));
+		}
+
+		strResult = String .format("%.2f", dSum);
+	}
+
+	private void delete()
+	{
+		if(bStartCalculate)
+		{
+			String strTemp = strFormula.substring(0, strFormula.length() - 1);
+			if(!strTemp.contains("+") && !strTemp.contains("-"))
+			{
+				strLeft = strFormula;
+				strFormula = strFormula.substring(0, strFormula.length() - 1);
+				bStartCalculate = false;
+			}
+			else
+				strFormula = strFormula.substring(0, strFormula.length() - 1);
+		}
+
+		if(bStartCalculate)
+			formulaCalculate();
+		else
+		{
+			if(!strLeft.isEmpty() && strLeft.length() != 1)
+				strLeft = strLeft.substring(0, strLeft.length() -1);
+			else
+				reset();
+		}
+	}
+}
