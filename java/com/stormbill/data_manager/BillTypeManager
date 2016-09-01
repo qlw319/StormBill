@@ -1,0 +1,127 @@
+package com.stormbill.stormbill.data_manager;
+
+import com.stormbill.stormbill.common_type.BillTypes;
+import com.stormbill.stormbill.database_manager.SQLiteDatabaseManager;
+
+import java.util.ArrayList;
+
+public class BillTypeManager
+{
+	public static boolean LoadBillType(ArrayList<BillTypes> arrIncomeBillTypeList, ArrayList<BillTypes> arrPayBillTypeList, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		boolean bLoadIncomeResult = sqLiteDatabaseManager.LoadIncomeBillType(arrIncomeBillTypeList);
+		boolean bLoadPayResult = sqLiteDatabaseManager.LoadPayBillType(arrPayBillTypeList);
+		if(bLoadIncomeResult && bLoadPayResult)
+			return true;
+
+		return false;
+	}
+
+	public static boolean ChangeName(ArrayList<BillTypes> arrBillTypeList, int nIndex, String strNewName, SQLiteDatabaseManager sqLiteDatabaseManager, boolean bIncome)
+	{
+		if(strNewName == null || strNewName.length() == 0)
+			return false;
+
+		if(arrBillTypeList == null || nIndex >= arrBillTypeList.size())
+			return false;
+
+		BillTypes modify = new BillTypes();
+		modify.strName = strNewName;
+		modify.strPicture = arrBillTypeList.get(nIndex).strPicture;
+		modify.nBillTypeID = arrBillTypeList.get(nIndex).nBillTypeID;
+		boolean bResult = false;
+		if(bIncome)
+			bResult = sqLiteDatabaseManager.ModifyAIncomeBillType(modify);
+		else
+			bResult = sqLiteDatabaseManager.ModifyAPayBillType(modify);
+
+		if(bResult == false)
+			return false;
+
+		BillTypes billType = arrBillTypeList.get(nIndex);
+		billType.strName = strNewName;
+
+		return true;
+	}
+
+	public static boolean ChangePicture(ArrayList<BillTypes> arrBillTypeList, int nIndex, String strNewPicture, SQLiteDatabaseManager sqLiteDatabaseManager, boolean bIncome)
+	{
+		if(strNewPicture == null || strNewPicture.length() == 0)
+			return false;
+
+		if(arrBillTypeList == null || nIndex >= arrBillTypeList.size())
+			return false;
+
+		BillTypes modify = new BillTypes();
+		modify.strName = arrBillTypeList.get(nIndex).strName;
+		modify.strPicture = strNewPicture;
+		modify.nBillTypeID = arrBillTypeList.get(nIndex).nBillTypeID;
+		boolean bResult = false;
+		if(bIncome)
+			bResult = sqLiteDatabaseManager.ModifyAIncomeBillType(modify);
+		else
+			bResult = sqLiteDatabaseManager.ModifyAPayBillType(modify);
+
+		if(bResult == false)
+			return false;
+
+		BillTypes billType = arrBillTypeList.get(nIndex);
+		billType.strPicture = strNewPicture;
+
+		return true;
+	}
+
+	public static boolean ModifyType(ArrayList<BillTypes> arrBillTypeList, int nIndex, String strNewName, String strNewPicture, SQLiteDatabaseManager sqLiteDatabaseManager, boolean bIncome)
+	{
+		if(strNewName == null || strNewPicture == null || strNewName.length() == 0 || strNewPicture.length() == 0)
+			return false;
+
+		if(arrBillTypeList == null || nIndex >= arrBillTypeList.size())
+			return false;
+
+		BillTypes modify = new BillTypes();
+		modify.strName = strNewName;
+		modify.strPicture = strNewPicture;
+		modify.nBillTypeID = arrBillTypeList.get(nIndex).nBillTypeID;
+		boolean bResult = false;
+		if(bIncome)
+			bResult = sqLiteDatabaseManager.ModifyAIncomeBillType(modify);
+		else
+			bResult = sqLiteDatabaseManager.ModifyAPayBillType(modify);
+
+		if(bResult == false)
+			return false;
+
+		BillTypes billType = arrBillTypeList.get(nIndex);
+		billType.strName = strNewName;
+		billType.strPicture = strNewPicture;
+
+		return true;
+	}
+
+	public static boolean AddType(ArrayList<BillTypes> arrBillTypeList, BillTypes eNewBillType, SQLiteDatabaseManager sqLiteDatabaseManager, boolean bIncome)
+	{
+		if(arrBillTypeList == null)
+			return false;
+
+		for(int i = 0; i < arrBillTypeList.size(); ++i)
+		{
+			BillTypes billTypes = arrBillTypeList.get(i);
+			if(eNewBillType.strName == billTypes.strName && eNewBillType.strPicture == billTypes.strPicture)
+				return false;
+		}
+
+		boolean bResult = false;
+		if(bIncome)
+			bResult = sqLiteDatabaseManager.AddAIncomeBillType(eNewBillType);
+		else
+			bResult = sqLiteDatabaseManager.AddAPayBillType(eNewBillType);
+
+		if(bResult == false)
+			return false;
+
+		arrBillTypeList.add(eNewBillType);
+
+		return true;
+	}
+}
