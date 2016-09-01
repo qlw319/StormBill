@@ -1,0 +1,282 @@
+package com.stormbill.stormbill.data_manager;
+
+import com.stormbill.stormbill.common_type.IncomeAndPay;
+import com.stormbill.stormbill.common_type.RecordItemDetails;
+import com.stormbill.stormbill.database_manager.SQLiteDatabaseManager;
+import com.stormbill.stormbill.datastructs.ControlCenter;
+
+import java.util.ArrayList;
+
+import static com.stormbill.stormbill.data_manager.DateInforManager.GetSpecifyDayIncomeAndPay;
+
+public class RecordItemDetailManager
+{
+	// 从数据库中把数据导入内存
+	public static boolean LoadRecordItem(ArrayList<RecordItemDetails> arrRecordItemDetailsList, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		if(arrRecordItemDetailsList == null)
+			return false;
+
+		boolean bLoadResult = sqLiteDatabaseManager.LoadBillRecords(arrRecordItemDetailsList);
+		if(bLoadResult)
+		{
+			OrderItemRecords();
+			DateInforManager.ImportDateInfo();
+		}
+
+		return bLoadResult;
+	}
+
+	// 增加一条记录
+	public static boolean AddRecordItem(RecordItemDetails eNewItem, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		boolean bResult = sqLiteDatabaseManager.AddABillRecord(eNewItem);
+		if(bResult == false)
+			return false;
+
+		ArrayList<RecordItemDetails> arrAllRecordList = ControlCenter.GetRecordItemDetails();
+		if(arrAllRecordList == null)
+			return false;
+
+		int nIndex = FindRecordItemIndex(eNewItem.strTimestamp);
+		if(nIndex == -1)
+		{
+			arrAllRecordList.add(eNewItem);
+			OrderItemRecords();
+		}
+		else
+			arrAllRecordList.add(nIndex, eNewItem);
+		DateInforManager.AddSingleRecordItem(eNewItem);
+
+		return true;
+	}
+
+	// 删除一条记录
+	public static boolean DeleteRecordItem(RecordItemDetails eItem, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		ArrayList<RecordItemDetails> arrAllRecordList = ControlCenter.GetRecordItemDetails();
+		if(arrAllRecordList == null)
+			return false;
+
+		int nIndex = FindRecordItemIndex(eItem.strTimestamp);
+		if(nIndex == -1)
+			return false;
+
+		boolean bResult = sqLiteDatabaseManager.DeleteABillRecord(eItem);
+		if(bResult == false)
+			return false;
+
+		arrAllRecordList.remove(nIndex);
+		DateInforManager.DeleteSingleRecordItem(eItem);
+
+		return true;
+	}
+
+	// 修改一条记录
+	public static boolean ModifyRecordItem(RecordItemDetails eItemModify, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		ArrayList<RecordItemDetails> arrAllRecordList = ControlCenter.GetRecordItemDetails();
+		if(arrAllRecordList == null)
+			return false;
+
+		int nIndex = FindRecordItemIndex(eItemModify.strTimestamp);
+		if(nIndex == -1)
+			return false;
+
+		if(sqLiteDatabaseManager.ModifyABillRecord(eItemModify))
+			return false;
+
+		RecordItemDetails eItemBefore = arrAllRecordList.get(nIndex);
+
+		if(eItemBefore.nYear == eItemModify.nYear && eItemBefore.nMonth == eItemModify.nMonth && eItemBefore.nDay == eItemModify.nDay)
+		{
+			RecordItemDetails recordItemDetail = arrAllRecordList.get(nIndex);
+			if(recordItemDetail.strMember != eItemModify.strMember)
+				recordItemDetail.strMember = eItemModify.strMember;
+
+			if(recordItemDetail.strRemark != eItemModify.strRemark)
+				recordItemDetail.strRemark = eItemModify.strRemark;
+
+			recordItemDetail.dPayMoney = eItemModify.dPayMoney;
+			recordItemDetail.dIncomeMoney = eItemModify.dIncomeMoney;
+			recordItemDetail.nBillTypeId = eItemModify.nBillTypeId;
+			recordItemDetail.nWalletTypeId = eItemModify.nWalletTypeId;
+		}
+		else
+		{
+			arrAllRecordList.remove(nIndex);
+			arrAllRecordList.add(eItemModify);
+			OrderItemRecords();
+		}
+
+		DateInforManager.ModifySingleRecordItem(eItemBefore, eItemModify);
+		return true;
+	}
+
+	// 获取每一天记录列表
+	public static ArrayList<RecordItemDetails> GetSpecifiedDayList(int nYear, int nMonth, int nDay)
+	{
+		ArrayList<RecordItemDetails> arrAllRecordList = ControlCenter.GetRecordItemDetails();
+		if(arrAllRecordList == null)
+			return null;
+
+		ArrayList<RecordItemDetails> arrDayList = new ArrayList<>();
+		for(int i = 0; i < arrAllRecordList.size(); ++i)
+		{
+			RecordItemDetails tmp = arrAllRecordList.get(i);
+			if(tmp.nYear != nYear || tmp.nMonth != nMonth || tmp.nDay != nDay)
+				continue;
+
+			RecordItemDetails item = new RecordItemDetails();
+			item.Instead(tmp);
+			// 这个地方有可能错了，因为我们需要的是尾插法
+			arrDayList.add(item);
+		}
+
+		return arrDayList;
+	}
+
+	// 获得时光轴所需样式的记录
+	public static ArrayList<RecordItemDetails> GetTimeLineRecordType()
+	{
+		ArrayList<RecordItemDetails> arrAllRecordList = ControlCenter.GetRecordItemDetails();
+		if(arrAllRecordList == null)
+			return null;
+
+		ArrayList<RecordItemDetails> arrTimeLineRecordList = new ArrayList<>();
+		int nLastRecordYear = 0;
+		int nLastRecordMonth = 0;
+		int nLastRecordDay = 0;
+		for(int i = 0; i < arrAllRecordList.size(); ++i)
+		{
+			RecordItemDetails tmp = arrAllRecordList.get(i);
+
+			if(tmp.nYear != nLastRecordYear)
+			{
+				RecordItemDetails item = new RecordItemDetails();
+				item.nYear = tmp.nYear;
+				item.nMonth = tmp.nMonth;
+				arrTimeLineRecordList.add(item);
+				nLastRecordYear = tmp.nYear;
+				nLastRecordMonth = tmp.nMonth;
+			}
+			else if(tmp.nMonth != nLastRecordMonth)
+			{
+				RecordItemDetails item = new RecordItemDetails();
+				item.nMonth = tmp.nMonth;
+				arrTimeLineRecordList.add(item);
+				nLastRecordMonth = tmp.nMonth;
+			}
+
+			if(tmp.nDay != nLastRecordDay)
+			{
+				RecordItemDetails item = new RecordItemDetails();
+				item.nDay = tmp.nDay;
+				IncomeAndPay moneyChange = GetSpecifyDayIncomeAndPay(tmp.nYear, tmp.nMonth, tmp.nDay);
+				item.dPayMoney += moneyChange.dPay;
+				item.dIncomeMoney += moneyChange.dIncome;
+				arrTimeLineRecordList.add(item);
+				nLastRecordDay = tmp.nDay;
+			}
+
+			RecordItemDetails item = new RecordItemDetails();
+			item.Instead(tmp);
+			// 这个地方有可能错了，因为我们需要的是尾插法
+			arrTimeLineRecordList.add(item);
+		}
+
+		return arrTimeLineRecordList;
+	}
+
+	// 对从数据库中加载的数据进行一次整理，内部采用的是快速排序
+	public static boolean OrderItemRecords()
+	{
+		ArrayList<RecordItemDetails> arrItemRecordsList = ControlCenter.GetRecordItemDetails();
+		if(arrItemRecordsList == null)
+			return false;
+
+		QuickSort(arrItemRecordsList, 0, arrItemRecordsList.size() - 1);
+
+		return true;
+	}
+
+	// 对数据库中加载出来的数据进行快速排序，排序是按时间从前到后排列
+	private static void QuickSort(ArrayList<RecordItemDetails> compare, int left, int right)
+	{
+		int dp;
+		if(left < right)
+		{
+			dp = Partition(compare, left, right);
+			QuickSort(compare, left, dp - 1);
+			QuickSort(compare, dp + 1, right);
+		}
+	}
+
+	// 快速排序中需要用到的划分边界的函数
+	private static int Partition(ArrayList<RecordItemDetails> arrItemsList, int left, int right)
+	{
+		RecordItemDetails pivot = arrItemsList.get(left);
+		while(left < right)
+		{
+			while(left < right && DateTimeCompare(arrItemsList.get(right), pivot))
+				right--;
+			if(left < right)
+				arrItemsList.get(left++).Instead(arrItemsList.get(right));
+			while(left < right && DateTimeCompare(arrItemsList.get(left), pivot))
+				left++;
+			if(left < right)
+				arrItemsList.get(right--).Instead(arrItemsList.get(left));
+		}
+		arrItemsList.get(left).Instead(pivot);
+		return left;
+	}
+
+	// 决定详细数据排列的方式，按时间的从最近到最久的顺序
+	private static boolean DateTimeCompare(RecordItemDetails first, RecordItemDetails second)
+	{
+		if(first.nYear > second.nYear)
+			return true;
+		else if(second.nYear > first.nYear)
+			return false;
+
+		if(first.nMonth > second.nMonth)
+			return true;
+		else if(second.nMonth > first.nMonth)
+			return false;
+
+		if(first.nDay > second.nDay)
+			return true;
+		else if(second.nDay > first.nDay)
+			return false;
+
+		if(first.nHour > second.nHour)
+			return true;
+		else if(second.nHour > first.nHour)
+			return false;
+
+		if(first.nMinute > second.nMinute)
+			return true;
+		else if(second.nMinute > first.nMinute)
+			return false;
+
+		return true;
+	}
+
+	public static int FindRecordItemIndex(String strTimestamp)
+	{
+		ArrayList<RecordItemDetails> arrItemRecordsList = ControlCenter.GetRecordItemDetails();
+		if(arrItemRecordsList == null)
+			return -1;
+
+		int nIndex = -1;
+		for(int i = 0; i < arrItemRecordsList.size(); ++i)
+		{
+			if(arrItemRecordsList.get(i).strTimestamp == strTimestamp)
+				continue;
+
+			nIndex = i;
+			break;
+		}
+		return nIndex;
+	}
+}
