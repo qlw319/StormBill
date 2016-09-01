@@ -1,0 +1,18 @@
+package com.stormbill.stormbill.bean;
+
+/**
+ * Created by Administrator on 2016/8/16 0016.
+ */
+public class Bean
+{
+	public String str1;
+	public String str2;
+	public int type;
+
+	public Bean()
+	{
+		str1 = "999999999.00";
+		str2 = "33311111111111111";
+		type = 0;
+	}
+}
