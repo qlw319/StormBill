@@ -1,0 +1,50 @@
+package com.stormbill.stormbill.fg;
+
+import android.support.v4.app.Fragment;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.stormbill.stormbill.R;
+
+
+public class FragmentAccount extends Fragment implements View.OnClickListener
+{
+	private LayoutInflater 		mInflater;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	{
+		mInflater = inflater;
+		return inflater.inflate(R.layout.fg_account, container, false);
+	}
+
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState)
+	{
+		super.onViewCreated(view, savedInstanceState);
+		initViews(view);
+		initDatas();
+		initEvents();
+	}
+
+	private void initViews(View view)
+	{
+	}
+
+	private void initDatas()
+	{
+
+	}
+
+	private void initEvents()
+	{
+	}
+
+	@Override
+	public void onClick(View view)
+	{
+
+	}
+}
