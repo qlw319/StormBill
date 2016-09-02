@@ -1,28 +1,23 @@
 package com.stormbill.stormbill.common_type;
 
-public class DateInformation
+public class BillTypes
 {
-	public int nYear;
-	public int nMonth;
-	public int nDay;
-	public double dPay;
-	public double dIncome;
+	public String strName;
+	public int nPicture;
+	public int nBillTypeID;
 
-	public DateInformation()
+	public BillTypes()
 	{
-		nYear = 0;
-		nMonth = 0;
-		nDay = 0;
-		dPay = 0;
-		dIncome = 0;
+		strName = new String();
+		nPicture = 0;
+		nBillTypeID = 0;
 	}
 
-	public void Instead(DateInformation other)
+	public void Instead(BillTypes other)
 	{
-		nYear = other.nYear;
-		nMonth = other.nMonth;
-		nDay = other.nDay;
-		dPay = other.dPay;
-		dIncome = other.dIncome;
+		if(strName != other.strName)
+			strName = other.strName;
+		nPicture = other.nPicture;
+		nBillTypeID = other.nBillTypeID;
 	}
 }
