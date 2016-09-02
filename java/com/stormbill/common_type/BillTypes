@@ -3,13 +3,13 @@ package com.stormbill.stormbill.common_type;
 public class BillTypes
 {
 	public String strName;
-	public String strPicture;
+	public int nPicture;
 	public int nBillTypeID;
 
 	public BillTypes()
 	{
 		strName = new String();
-		strPicture = new String();
+		nPicture = 0;
 		nBillTypeID = 0;
 	}
 
@@ -17,8 +17,7 @@ public class BillTypes
 	{
 		if(strName != other.strName)
 			strName = other.strName;
-		if(strPicture != other.strPicture)
-			strPicture = other.strPicture;
+		nPicture = other.nPicture;
 		nBillTypeID = other.nBillTypeID;
 	}
 }
