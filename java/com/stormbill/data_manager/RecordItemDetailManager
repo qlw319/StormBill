@@ -17,10 +17,11 @@ public class RecordItemDetailManager
 		if(arrRecordItemDetailsList == null)
 			return false;
 
+		arrRecordItemDetailsList.clear();
 		boolean bLoadResult = sqLiteDatabaseManager.LoadBillRecords(arrRecordItemDetailsList);
 		if(bLoadResult)
 		{
-			OrderItemRecords();
+//			OrderItemRecords();
 			DateInforManager.ImportDateInfo();
 		}
 
@@ -37,18 +38,24 @@ public class RecordItemDetailManager
 		ArrayList<RecordItemDetails> arrAllRecordList = ControlCenter.GetRecordItemDetails();
 		if(arrAllRecordList == null)
 			return false;
-
-		int nIndex = FindRecordItemIndex(eNewItem.strTimestamp);
-		if(nIndex == -1)
+		if(LoadRecordItem(arrAllRecordList, sqLiteDatabaseManager))
 		{
-			arrAllRecordList.add(eNewItem);
-			OrderItemRecords();
+			DateInforManager.AddSingleRecordItem(eNewItem);
+			return true;
 		}
-		else
-			arrAllRecordList.add(nIndex, eNewItem);
-		DateInforManager.AddSingleRecordItem(eNewItem);
+		return false;
 
-		return true;
+//		int nIndex = FindRecordItemIndex(eNewItem.strTimestamp);
+//		if(nIndex == -1)
+//		{
+//			arrAllRecordList.add(eNewItem);
+//			OrderItemRecords();
+//		}
+//		else
+//			arrAllRecordList.add(nIndex, eNewItem);
+//		DateInforManager.AddSingleRecordItem(eNewItem);
+//
+//		return true;
 	}
 
 	// 删除一条记录
@@ -68,7 +75,6 @@ public class RecordItemDetailManager
 
 		arrAllRecordList.remove(nIndex);
 		DateInforManager.DeleteSingleRecordItem(eItem);
-
 		return true;
 	}
 
@@ -104,9 +110,8 @@ public class RecordItemDetailManager
 		}
 		else
 		{
-			arrAllRecordList.remove(nIndex);
-			arrAllRecordList.add(eItemModify);
-			OrderItemRecords();
+			sqLiteDatabaseManager.ModifyABillRecord(eItemModify);
+			LoadRecordItem(arrAllRecordList, sqLiteDatabaseManager);
 		}
 
 		DateInforManager.ModifySingleRecordItem(eItemBefore, eItemModify);
