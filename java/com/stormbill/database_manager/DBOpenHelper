@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
+import android.util.Log;
 
 import com.stormbill.stormbill.common_type.BillTypes;
 import com.stormbill.stormbill.common_type.RecordItemDetails;
@@ -13,7 +14,11 @@ import com.stormbill.stormbill.common_type.WalletTypes;
 import java.io.File;
 import java.util.ArrayList;
 
+import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitIncomeTypesName;
+import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitIncomeTypesPicture;
 import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitMembers;
+import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitPayTypesName;
+import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitPayTypesPicture;
 
 public class DBOpenHelper extends SQLiteOpenHelper
 {
@@ -26,14 +31,13 @@ public class DBOpenHelper extends SQLiteOpenHelper
 
 	private SQLiteDatabase m_dbRead = null;
 	private SQLiteDatabase m_dbWrite = null;
-	private boolean m_bInitialization = false;
+	private boolean m_bInitForDBFirstCreate = false;
 
 	public DBOpenHelper(Context context)
 	{
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		m_dbRead = getReadableDatabase();
 		m_dbWrite = getWritableDatabase();
-		m_bInitialization = true;
 	}
 
 	public void Release()
@@ -46,7 +50,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 	@Override
 	public void onCreate(SQLiteDatabase db)
 	{
-		String sql = "CREATE TABLE bill_record (" +
+		String sql = "CREATE TABLE IF NOT EXISTS bill_record (" +
 				"    timestamp DATETIME PRIMARY KEY" +
 				"                       NOT NULL" +
 				"                       DEFAULT CURRENT_TIMESTAMP," +
@@ -62,28 +66,28 @@ public class DBOpenHelper extends SQLiteOpenHelper
 				"    member    TEXT," +
 				"    remark    TEXT );";
 
-		String sq2 = "CREATE TABLE income_bill_type_tab" +
+		String sq2 = "CREATE TABLE IF NOT EXISTS income_bill_type_tab (" +
 				"    icon_name TEXT     NOT NULL," +
-				"    icon_bg   TEXT     NOT NULL," +
+				"    icon_bg   INT      NOT NULL," +
 				"    icon_id   INT      NOT NULL);";
 
-		String sq3 = "CREATE TABLE pay_bill_type_tab" +
-				"    icon_name TEXT     NOT NULL," +
-				"    icon_bg   TEXT     NOT NULL," +
-				"    icon_id   INT      NOT NULL);";
+		String sq3 = "CREATE TABLE IF NOT EXISTS pay_bill_type_tab (" +
+				"    icon_name 		TEXT     NOT NULL," +
+				"    icon_bg   		INT      NOT NULL," +
+				"    icon_id  		INT      NOT NULL);";
 
-		String sq4 = "CREATE TABLE wallet_type_tab" +
-				"    wallet_name TEXT	NOT NULL" +
-				"  wallet_layout TEXT	NOT NULL" +
-				"   wallet_color TEXT	NOT NULL" +
-				"   wallet_id	 INT	NOT NULL);";
+		String sq4 = "CREATE TABLE IF NOT EXISTS wallet_type_tab (" +
+				"    wallet_name 		TEXT	NOT NULL," +
+				"    wallet_layout 		TEXT	NOT NULL," +
+				"    wallet_color 		TEXT	NOT NULL," +
+				"    wallet_id	 		INT	NOT NULL);";
 
-		String sq5 = "CREATE TABLE member_tab" + "   member_name	 TEXT	NOT NULL);";
+		String sq5 = "CREATE TABLE IF NOT EXISTS member_tab (" + "   member_name	 TEXT	NOT NULL);";
 
-		String sq6 = "CREATE TABLE id_relative_tab" +
-				"  income_bill_id_relative INT	NOT NULL" +
-				"  pay_bill_id_relative INT	NOT NULL" +
-				"wallet_id_relative INT NOT NULL);";
+		String sq6 = "CREATE TABLE IF NOT EXISTS id_relative_tab (" +
+				"  income_bill_id_relative 	INT	NOT NULL," +
+				"  pay_bill_id_relative 	INT	NOT NULL," +
+				"  wallet_id_relative 		INT NOT NULL);";
 
 		db.beginTransaction();
 		try
@@ -95,18 +99,27 @@ public class DBOpenHelper extends SQLiteOpenHelper
 			db.execSQL(sq5);
 			db.execSQL(sq6);
 			db.setTransactionSuccessful();
+			Log.d("hehe", "onCreate");
 		}
 		finally
 		{
 			db.endTransaction();
 		}
 
+		m_bInitForDBFirstCreate = true;
+	}
+
+	public void Init()
+	{
+		if(!m_bInitForDBFirstCreate)
+			return;
+
+		InitializationIdRelativeTab();
 		InitializationBillRecord();
 		InitializationIncomeBillTypeTab();
 		InitializationPayBillTypeTab();
 		InitializationWalletTypeTab();
 		InitializationMemberTab();
-		InitializationIdRelativeTab();
 	}
 
 	// Initialization bill_record
@@ -117,11 +130,27 @@ public class DBOpenHelper extends SQLiteOpenHelper
 	// Initialization income_bill_type_tab
 	private void InitializationIncomeBillTypeTab()
 	{
+		for(int i = 0; i < InitIncomeTypesName.length; ++i)
+		{
+			BillTypes billTypes = new BillTypes();
+			billTypes.strName = InitIncomeTypesName[i];
+			if(i < InitIncomeTypesPicture.length)
+				billTypes.nPicture = InitIncomeTypesPicture[i];
+			AddIncomeBillTypeTab(billTypes);
+		}
 	}
 
 	// Initialization pay_bill_type_tab
 	private void InitializationPayBillTypeTab()
 	{
+		for(int i = 0; i < InitPayTypesName.length; ++i)
+		{
+			BillTypes billTypes = new BillTypes();
+			billTypes.strName = InitPayTypesName[i];
+			if(i < InitPayTypesPicture.length)
+				billTypes.nPicture = InitPayTypesPicture[i];
+			AddPayBillTypeTab(billTypes);
+		}
 	}
 
 	// Initialization wallet_type_tab
@@ -297,7 +326,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 	{
 		arrRecordList.clear();
 
-		String sql = "select * from bill_record order by timestamp desc";
+		String sql = "select * from bill_record order by year desc, month desc, day desc, timestamp desc";
 		Cursor cursor = m_dbRead.rawQuery(sql, null);
 		if(cursor.moveToFirst() == false)
 			return false;
@@ -314,12 +343,13 @@ public class DBOpenHelper extends SQLiteOpenHelper
 			item.nHour = cursor.getInt(cursor.getColumnIndex("hour"));
 			item.nMinute = cursor.getInt(cursor.getColumnIndex("minute"));
 			item.nBillTypeId = cursor.getInt(cursor.getColumnIndex("billId"));
-			item.nWalletTypeId = cursor.getInt(cursor.getColumnIndex("walletID"));
+			item.nWalletTypeId = cursor.getInt(cursor.getColumnIndex("walletId"));
 			item.dPayMoney = cursor.getDouble(cursor.getColumnIndex("pay"));
 			item.dIncomeMoney = cursor.getDouble(cursor.getColumnIndex("income"));
 			item.strMember = cursor.getString(cursor.getColumnIndex("member"));
 			item.strRemark = cursor.getString(cursor.getColumnIndex("remark"));
 			arrRecordList.add(item);
+			cursor.moveToNext();
 		}
 
 		return true;
@@ -451,7 +481,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 		{
 			m_dbWrite.execSQL(sql2, new Object[]{
 					ddt.strName,
-					ddt.strPicture,
+					ddt.nPicture,
 					ddt.nBillTypeID
 			});
 			m_dbWrite.setTransactionSuccessful();
@@ -509,7 +539,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 		{
 			BillTypes newddt = new BillTypes();
 			newddt.strName = cursor.getString(cursor.getColumnIndex("icon_name"));
-			newddt.strPicture = cursor.getString(cursor.getColumnIndex("icon_bg"));
+			newddt.nPicture = cursor.getInt(cursor.getColumnIndex("icon_bg"));
 			newddt.nBillTypeID = cursor.getInt(cursor.getColumnIndex("icon_id"));
 
 			cursor.close();
@@ -534,7 +564,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 		{
 			m_dbWrite.execSQL(sql, new Object[]{
 					ddt.strName,
-					ddt.strPicture,
+					ddt.nPicture,
 					ddt.nBillTypeID
 			});
 			m_dbWrite.setTransactionSuccessful();
@@ -555,7 +585,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 	{
 		arrBillTypeList.clear();
 
-		String sql = "select * from income_bill_record";
+		String sql = "select * from income_bill_type_tab";
 		Cursor cursor = m_dbRead.rawQuery(sql, null);
 		if(cursor.moveToFirst() == false)
 			return false;
@@ -566,9 +596,10 @@ public class DBOpenHelper extends SQLiteOpenHelper
 			BillTypes item = new BillTypes();
 
 			item.strName = cursor.getString(cursor.getColumnIndex("icon_name"));
-			item.strPicture = cursor.getString(cursor.getColumnIndex("icon_bg"));
+			item.nPicture = cursor.getInt(cursor.getColumnIndex("icon_bg"));
 			item.nBillTypeID = cursor.getInt(cursor.getColumnIndex("icon_id"));
 			arrBillTypeList.add(item);
+			cursor.moveToNext();
 		}
 
 		return true;
@@ -577,7 +608,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 	// pay_bill_type_tab operation
 	public boolean AddPayBillTypeTab(BillTypes ddt)
 	{
-		if(FindInPayBillTypeTab(ddt) == null)
+		if(FindInPayBillTypeTab(ddt) != null)
 			return false;
 
 		String sql1 = "select * from pay_bill_type_tab";
@@ -596,7 +627,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 		{
 			m_dbWrite.execSQL(sql2, new Object[]{
 					ddt.strName,
-					ddt.strPicture,
+					ddt.nPicture,
 					ddt.nBillTypeID
 			});
 			m_dbWrite.setTransactionSuccessful();
@@ -654,7 +685,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 		{
 			BillTypes newddt = new BillTypes();
 			newddt.strName = cursor.getString(cursor.getColumnIndex("timestamp"));
-			newddt.strPicture = cursor.getString(cursor.getColumnIndex("icon_bg"));
+			newddt.nPicture = cursor.getInt(cursor.getColumnIndex("icon_bg"));
 			newddt.nBillTypeID = cursor.getInt(cursor.getColumnIndex("icon_id"));
 
 			cursor.close();
@@ -679,7 +710,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 		{
 			m_dbWrite.execSQL(sql, new Object[]{
 					ddt.strName,
-					ddt.strPicture,
+					ddt.nPicture,
 					ddt.nBillTypeID
 			});
 			m_dbWrite.setTransactionSuccessful();
@@ -700,7 +731,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 	{
 		arrPayBillTypeList.clear();
 
-		String sql = "select * from pay_bill_record";
+		String sql = "select * from pay_bill_type_tab";
 		Cursor cursor = m_dbRead.rawQuery(sql, null);
 		if(cursor.moveToFirst() == false)
 			return false;
@@ -711,9 +742,10 @@ public class DBOpenHelper extends SQLiteOpenHelper
 			BillTypes item = new BillTypes();
 
 			item.strName = cursor.getString(cursor.getColumnIndex("icon_name"));
-			item.strPicture = cursor.getString(cursor.getColumnIndex("icon_bg"));
+			item.nPicture = cursor.getInt(cursor.getColumnIndex("icon_bg"));
 			item.nBillTypeID = cursor.getInt(cursor.getColumnIndex("icon_id"));
 			arrPayBillTypeList.add(item);
+			cursor.moveToNext();
 		}
 
 		return true;
@@ -857,6 +889,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 			item.strColor = cursor.getString(cursor.getColumnIndex("wallet_color"));
 			item.nWalletTypeID = cursor.getInt(cursor.getColumnIndex("wallet_id"));
 			arrWalletTypesList.add(item);
+			cursor.moveToNext();
 		}
 
 		return true;
@@ -865,6 +898,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 	// member_tab operation
 	public boolean AddMemberTab(String strNewMember)
 	{
+		Log.d("hehe", "AddMemberTab");
 		String sql1 = "select * from member_tab";
 		String sql2 = "insert into member_tab (member_name) values(?)";
 
@@ -934,10 +968,9 @@ public class DBOpenHelper extends SQLiteOpenHelper
 		int nItemCount = cursor.getCount();
 		for(int i = 0; i < nItemCount; ++i)
 		{
-			String item = new String();
-
-			item = cursor.getString(cursor.getColumnIndex("member_name"));
+			String item = cursor.getString(cursor.getColumnIndex("member_name"));
 			arrMemberList.add(item);
+			cursor.moveToNext();
 		}
 
 		return true;
