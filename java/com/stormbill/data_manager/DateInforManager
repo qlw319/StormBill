@@ -16,6 +16,7 @@ public class DateInforManager
 		if(arrDateInfoList == null || arrDateInfoList == null)
 			return false;
 
+		arrDateInfoList.clear();
 		int nLastRecordYear = 0;
 		int nLastRecordMonth = 0;
 		int nLastRecordDay = 0;
@@ -150,9 +151,6 @@ public class DateInforManager
 			if(tmp.dPay <= 0 && tmp.dIncome <= 0)
 				arrDateInfoList.remove(i);
 		}
-
-		// 排序
-		QuickSort(arrDateInfoList, 0, arrDateInfoList.size() - 1);
 	}
 
 	public static DateInformation GetDateInforByDate(int nYear, int nMonth, int nDay)
