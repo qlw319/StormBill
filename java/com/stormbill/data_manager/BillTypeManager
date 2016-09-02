@@ -5,6 +5,8 @@ import com.stormbill.stormbill.database_manager.SQLiteDatabaseManager;
 
 import java.util.ArrayList;
 
+import static com.stormbill.stormbill.initialization_information.CommonInitInfor.AllIncomedAndPayBackground;
+
 public class BillTypeManager
 {
 	public static boolean LoadBillType(ArrayList<BillTypes> arrIncomeBillTypeList, ArrayList<BillTypes> arrPayBillTypeList, SQLiteDatabaseManager sqLiteDatabaseManager)
@@ -27,7 +29,7 @@ public class BillTypeManager
 
 		BillTypes modify = new BillTypes();
 		modify.strName = strNewName;
-		modify.strPicture = arrBillTypeList.get(nIndex).strPicture;
+		modify.nPicture = arrBillTypeList.get(nIndex).nPicture;
 		modify.nBillTypeID = arrBillTypeList.get(nIndex).nBillTypeID;
 		boolean bResult = false;
 		if(bIncome)
@@ -44,9 +46,9 @@ public class BillTypeManager
 		return true;
 	}
 
-	public static boolean ChangePicture(ArrayList<BillTypes> arrBillTypeList, int nIndex, String strNewPicture, SQLiteDatabaseManager sqLiteDatabaseManager, boolean bIncome)
+	public static boolean ChangePicture(ArrayList<BillTypes> arrBillTypeList, int nIndex, int nNewPicture, SQLiteDatabaseManager sqLiteDatabaseManager, boolean bIncome)
 	{
-		if(strNewPicture == null || strNewPicture.length() == 0)
+		if(IsExistPicture(nNewPicture) == false)
 			return false;
 
 		if(arrBillTypeList == null || nIndex >= arrBillTypeList.size())
@@ -54,7 +56,7 @@ public class BillTypeManager
 
 		BillTypes modify = new BillTypes();
 		modify.strName = arrBillTypeList.get(nIndex).strName;
-		modify.strPicture = strNewPicture;
+		modify.nPicture = nNewPicture;
 		modify.nBillTypeID = arrBillTypeList.get(nIndex).nBillTypeID;
 		boolean bResult = false;
 		if(bIncome)
@@ -65,15 +67,12 @@ public class BillTypeManager
 		if(bResult == false)
 			return false;
 
-		BillTypes billType = arrBillTypeList.get(nIndex);
-		billType.strPicture = strNewPicture;
-
 		return true;
 	}
 
-	public static boolean ModifyType(ArrayList<BillTypes> arrBillTypeList, int nIndex, String strNewName, String strNewPicture, SQLiteDatabaseManager sqLiteDatabaseManager, boolean bIncome)
+	public static boolean ModifyType(ArrayList<BillTypes> arrBillTypeList, int nIndex, String strNewName, int nNewPicture, SQLiteDatabaseManager sqLiteDatabaseManager, boolean bIncome)
 	{
-		if(strNewName == null || strNewPicture == null || strNewName.length() == 0 || strNewPicture.length() == 0)
+		if(strNewName == null || IsExistPicture(nNewPicture) == false)
 			return false;
 
 		if(arrBillTypeList == null || nIndex >= arrBillTypeList.size())
@@ -81,7 +80,7 @@ public class BillTypeManager
 
 		BillTypes modify = new BillTypes();
 		modify.strName = strNewName;
-		modify.strPicture = strNewPicture;
+		modify.nPicture = nNewPicture;
 		modify.nBillTypeID = arrBillTypeList.get(nIndex).nBillTypeID;
 		boolean bResult = false;
 		if(bIncome)
@@ -94,7 +93,7 @@ public class BillTypeManager
 
 		BillTypes billType = arrBillTypeList.get(nIndex);
 		billType.strName = strNewName;
-		billType.strPicture = strNewPicture;
+		billType.nPicture = nNewPicture;
 
 		return true;
 	}
@@ -107,7 +106,7 @@ public class BillTypeManager
 		for(int i = 0; i < arrBillTypeList.size(); ++i)
 		{
 			BillTypes billTypes = arrBillTypeList.get(i);
-			if(eNewBillType.strName == billTypes.strName && eNewBillType.strPicture == billTypes.strPicture)
+			if(eNewBillType.strName == billTypes.strName && eNewBillType.nPicture == billTypes.nPicture)
 				return false;
 		}
 
@@ -123,5 +122,15 @@ public class BillTypeManager
 		arrBillTypeList.add(eNewBillType);
 
 		return true;
+	}
+
+	public static boolean IsExistPicture(int nPicture)
+	{
+		for(int i = 0; i < AllIncomedAndPayBackground.length; ++i)
+		{
+			if(nPicture == AllIncomedAndPayBackground[i])
+				return true;
+		}
+		return false;
 	}
 }
