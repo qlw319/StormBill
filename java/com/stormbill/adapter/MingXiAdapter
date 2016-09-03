@@ -1,25 +1,50 @@
 package com.stormbill.stormbill.adapter;
 
 import android.content.Context;
+import android.view.View;
 
-import com.stormbill.stormbill.bean.Bean;
 import com.stormbill.stormbill.R;
+import com.stormbill.stormbill.common_type.RecordItemDetails;
+import com.stormbill.stormbill.initialization_information.CommonInitInfor;
 
 import java.util.List;
 
-public class MingXiAdapter extends CommonAdapter<Bean>
+import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitIncomeTypesName;
+import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitPayTypesName;
+
+public class MingXiAdapter extends CommonAdapter<RecordItemDetails>
 {
-	public MingXiAdapter(Context context, int layoutId, List<Bean> datas)
+	public MingXiAdapter(Context context, int layoutId, List<RecordItemDetails> datas)
 	{
 		super(context, layoutId, datas);
 	}
 
 	@Override
-	public void convertView(ViewHolder holder, Bean bean)
+	public void convertView(ViewHolder holder, RecordItemDetails recordItemDetails)
 	{
-		holder.setText(R.id.id_tv_income_money, bean.str1)
-				.setText(R.id.id_tv_pay_money, bean.str2)
-				.setText(R.id.id_tv_income_remark, bean.str1)
-				.setText(R.id.id_tv_pay_remark, bean.str2);
+		if(recordItemDetails.dPayMoney > 0)
+		{
+			holder.setText(R.id.id_pay_type, InitPayTypesName[recordItemDetails.nBillTypeId]).setText(R.id.id_tv_pay_remark, recordItemDetails.strRemark).setText(R.id.id_tv_pay_money, String.valueOf(recordItemDetails.dPayMoney)).setImage(R.id.id_imageView_type, CommonInitInfor.InitPayTypesPicture[recordItemDetails.nBillTypeId]);
+
+			holder.getView(R.id.id_income_type).setVisibility(View.GONE);
+			holder.getView(R.id.id_tv_income_remark).setVisibility(View.GONE);
+			holder.getView(R.id.id_tv_income_money).setVisibility(View.GONE);
+
+			holder.getView(R.id.id_pay_type).setVisibility(View.VISIBLE);
+			holder.getView(R.id.id_tv_pay_remark).setVisibility(View.VISIBLE);
+			holder.getView(R.id.id_tv_pay_money).setVisibility(View.VISIBLE);
+		}
+		else if(recordItemDetails.dIncomeMoney > 0)
+		{
+			holder.setText(R.id.id_income_type, InitIncomeTypesName[recordItemDetails.nBillTypeId]).setText(R.id.id_tv_income_remark, recordItemDetails.strRemark).setText(R.id.id_tv_income_money, String.valueOf(recordItemDetails.dIncomeMoney)).setImage(R.id.id_imageView_type, CommonInitInfor.InitIncomeTypesPicture[recordItemDetails.nBillTypeId]);
+
+			holder.getView(R.id.id_pay_type).setVisibility(View.GONE);
+			holder.getView(R.id.id_tv_pay_remark).setVisibility(View.GONE);
+			holder.getView(R.id.id_tv_pay_money).setVisibility(View.GONE);
+
+			holder.getView(R.id.id_income_type).setVisibility(View.VISIBLE);
+			holder.getView(R.id.id_tv_income_remark).setVisibility(View.VISIBLE);
+			holder.getView(R.id.id_tv_income_money).setVisibility(View.VISIBLE);
+		}
 	}
 }
