@@ -23,7 +23,6 @@ public class MemberGroupAdapter extends CommonAdapter<String>
 	@Override
 	public void convertView(ViewHolder viewHolder, String s)
 	{
-		viewHolder.setTextColor(R.id.groupItem, Color.BLACK);
 		viewHolder.setText(R.id.groupItem, s);
 	}
 }
