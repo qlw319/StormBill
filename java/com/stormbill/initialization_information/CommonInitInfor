@@ -1,5 +1,7 @@
 package com.stormbill.stormbill.initialization_information;
 
+import com.stormbill.stormbill.R;
+
 public class CommonInitInfor
 {
 	// 账户信息icon的信息
@@ -47,11 +49,123 @@ public class CommonInitInfor
 	};
 
 	// 收支情况的icon图片信息
-	public static String[] AllIncomedAndPayBackground = new String[]{
+	public static int[] AllIncomedAndPayBackground = new int[]{
+			//支出
+			R.mipmap.yiban,
+			R.mipmap.canyin,
+			R.mipmap.jiaotong,
+			R.mipmap.jiushui,
+			R.mipmap.shuiguo,
+			R.mipmap.lingshi,
+			R.mipmap.maicai,
+			R.mipmap.yifu,
+			R.mipmap.shenghuo,
+			R.mipmap.huafei,
+			R.mipmap.caizhuang,
+			R.mipmap.fangzu,
+			R.mipmap.dianying,
+			R.mipmap.wanggou,
+			R.mipmap.hongbao1,
+			R.mipmap.yaopin,
+
+			//收入
+			R.mipmap.gongzi,
+			R.mipmap.shenghuofei,
+			R.mipmap.hongbao,
+			R.mipmap.jianzhi,
+			R.mipmap.linghuaqian,
+			R.mipmap.touzi,
+			R.mipmap.jiangjin,
+			R.mipmap.baoxiao,
+			R.mipmap.xianjin,
+			R.mipmap.tuikuan,
+			R.mipmap.qita,
+
+			//其他
+			R.mipmap.type_01,
+			R.mipmap.type_02,
+			R.mipmap.type_03,
+			R.mipmap.type_04,
+			R.mipmap.type_05,
+			R.mipmap.type_06,
+			R.mipmap.type_07,
+			R.mipmap.type_08,
+			R.mipmap.type_09,
+			R.mipmap.type_10,
+			R.mipmap.type_11,
+			R.mipmap.type_12,
+			R.mipmap.type_13,
+			R.mipmap.type_14,
+			R.mipmap.type_15,
+			R.mipmap.type_16,
+			R.mipmap.type_17,
+			R.mipmap.type_18,
+			R.mipmap.type_19,
+			R.mipmap.type_20,
+			R.mipmap.type_21,
+			R.mipmap.type_22,
+			R.mipmap.type_23,
+			R.mipmap.type_24,
+			R.mipmap.type_25,
+			R.mipmap.type_26,
+			R.mipmap.type_27,
+			R.mipmap.type_28,
+			R.mipmap.type_29,
+			R.mipmap.type_30,
+			R.mipmap.type_31,
+			R.mipmap.type_32,
+			R.mipmap.type_33,
+			R.mipmap.type_34,
+			R.mipmap.type_35,
+			R.mipmap.type_36,
+			R.mipmap.type_37,
+			R.mipmap.type_38,
+			R.mipmap.type_39,
+			R.mipmap.type_40,
+			R.mipmap.type_41,
+			R.mipmap.type_42,
+			R.mipmap.type_43,
+			R.mipmap.type_44,
+			R.mipmap.type_45,
+			R.mipmap.type_46,
+			R.mipmap.type_47,
+			R.mipmap.type_48,
+			R.mipmap.type_49,
+			R.mipmap.type_50,
+			R.mipmap.type_51,
+			R.mipmap.type_52,
+			R.mipmap.type_53,
+			R.mipmap.type_54,
+			R.mipmap.type_55,
+			R.mipmap.type_56,
+			R.mipmap.type_67,
+			R.mipmap.type_68,
+			R.mipmap.type_59,
+			R.mipmap.type_60,
+			R.mipmap.type_61,
+			R.mipmap.type_62,
+			R.mipmap.type_63,
+			R.mipmap.type_64,
+			R.mipmap.type_65,
+			R.mipmap.type_66,
+			R.mipmap.type_67,
+			R.mipmap.type_68,
+			R.mipmap.type_69,
+			R.mipmap.type_70,
+			R.mipmap.type_71,
+			R.mipmap.type_72,
+			R.mipmap.type_73,
+			R.mipmap.type_74,
+			R.mipmap.type_75,
+			R.mipmap.type_76,
+			R.mipmap.type_77,
+			R.mipmap.type_78,
+			R.mipmap.type_79,
+			R.mipmap.type_80
 	};
 
 	// income bill type tab
-	public static String[] InitPayTypes = new String[]{
+	public static String[] InitPayTypesName = new String[]{
 			"一般",
 			"餐饮",
 			"交通",
@@ -67,31 +181,55 @@ public class CommonInitInfor
 			"电影",
 			"淘宝",
 			"红包",
-			"药品",
-			"编辑"
+			"药品"
 	};
 
-	public static String[] InitPayTypeBackground = new String[]{
+	public static int[] InitPayTypesPicture = new int[]{
+			R.mipmap.yiban,
+			R.mipmap.canyin,
+			R.mipmap.jiaotong,
+			R.mipmap.jiushui,
+			R.mipmap.shuiguo,
+			R.mipmap.lingshi,
+			R.mipmap.maicai,
+			R.mipmap.yifu,
+			R.mipmap.shenghuo,
+			R.mipmap.huafei,
+			R.mipmap.caizhuang,
+			R.mipmap.fangzu,
+			R.mipmap.dianying,
+			R.mipmap.wanggou,
+			R.mipmap.hongbao1,
+			R.mipmap.yaopin
 	};
 
 	// pay bill type tab
-	public static String[] InitIncomeTypes = new String[]{
+	public static String[] InitIncomeTypesName = new String[]{
 			"工资",
 			"生活费",
 			"红包",
+			"兼职",
 			"零花钱",
-			"外快兼职",
 			"投资收入",
 			"奖金",
 			"报销",
 			"现金",
 			"退款",
-			"支付宝",
-			"其他",
-			"编辑"
+			"其他"
 	};
 
-	public static String[] InitIncomeTypeBackground = new String[]{
+	public static int[] InitIncomeTypesPicture = new int[]{
+			R.mipmap.gongzi,
+			R.mipmap.shenghuofei,
+			R.mipmap.hongbao,
+			R.mipmap.jianzhi,
+			R.mipmap.linghuaqian,
+			R.mipmap.touzi,
+			R.mipmap.jiangjin,
+			R.mipmap.baoxiao,
+			R.mipmap.xianjin,
+			R.mipmap.tuikuan,
+			R.mipmap.qita
 	};
 
 	// member initialization
