@@ -1,7 +1,9 @@
 package com.stormbill.stormbill.fg;
 
+import android.app.Service;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -9,9 +11,13 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -22,10 +28,13 @@ import android.widget.Toast;
 
 import com.stormbill.stormbill.R;
 import com.stormbill.stormbill.activity.MainActivity;
+import com.stormbill.stormbill.adapter.MemberGroupAdapter;
 import com.stormbill.stormbill.adapter.ViewPagerAdapter;
 import com.stormbill.stormbill.callback.FragmentCallBack;
 import com.stormbill.stormbill.common.Calculator;
 import com.stormbill.stormbill.common.Common;
+import com.stormbill.stormbill.common_type.RecordItemDetails;
+import com.stormbill.stormbill.datastructs.ControlCenter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,7 +46,7 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 	private FragmentCallBack fragmentCallBack = null;
 	private LayoutInflater mInflater;
 	private View mRootView;
-	private Button mBtnReturn;
+	private ImageButton mBtnReturn;
 	private Button mBtnIncome;
 	private Button mBtnPay;
 
@@ -55,12 +64,10 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 	private String strMoney = "0.00";
 	private String strBigFormula = "0";
 	private String strSmallFormula = "0";
+	private boolean bIsPay = true;
 
 	private PopupWindow mKeyBoardPopWindow;
-	private Button mBtnAccount;
 	private Button mBtnTime;
-	private Button mBtnMember;
-	private Button mBtnReMark;
 
 	private PopupWindow mCalenderPopWindow;
 
@@ -69,13 +76,12 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 	private ListView lv_member_group;
 
 	private PopupWindow m_AccountPopupWindow;
-
 	private View m_AccountView;
 
-	private Calendar calendar;
-	private int year;
-	private int month;
-	private int day;
+	private PopupWindow m_RemarkPopupWindow;
+	private View m_RemarkView;
+	private EditText mEditText;
+	private InputMethodManager imm;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -96,7 +102,20 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 	public void onHiddenChanged(boolean hidden)
 	{
 		if(!hidden)
+		{
+			Log.d("hehe", "onHiddenChanged");
+			Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+			SimpleDateFormat sfYear = new SimpleDateFormat("M月d日");
+			String strTime = sfYear.format(calendar.getTime());
+
+			mBtnTime.setText(strTime);
+
+			Common.mRecordItemDetails.nYear = calendar.get(Calendar.YEAR);
+			Common.mRecordItemDetails.nMonth = calendar.get(Calendar.MONTH) + 1;
+			Common.mRecordItemDetails.nDay = calendar.get(Calendar.DATE);
+
 			showKeyBoard(mRootView);
+		}
 	}
 
 	private void initViews(View view)
@@ -104,7 +123,7 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 		mRootView = view;
 		Common.mTvType = (TextView)view.findViewById(R.id.id_money_type);
 		Common.mImgType = (ImageView)view.findViewById(R.id.id_type_img);
-		mBtnReturn = (Button)view.findViewById(R.id.id_btn_return);
+		mBtnReturn = (ImageButton)view.findViewById(R.id.id_btn_return);
 		mBtnIncome = (Button)view.findViewById(R.id.id_btn_income);
 		mBtnPay = (Button)view.findViewById(R.id.id_btn_pay);
 		mLlMoney = (LinearLayout)view.findViewById(R.id.id_money);
@@ -116,30 +135,40 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 		mInflater = LayoutInflater.from(view.getContext());
 
 		mBtnPay.setTextColor(getResources().getColor(R.color.blues));
+		bIsPay = true;
 		mBtnIncome.setTextColor(getResources().getColor(R.color.black));
 		mBtnPay.setOnClickListener(this);
 		mBtnIncome.setOnClickListener(this);
 		mLlMoney.setOnClickListener(this);
+
+		//
+		m_MemberView = mInflater.inflate(R.layout.group_list, null);
+		lv_member_group = (ListView)m_MemberView.findViewById(R.id.lvGroup);
+		//
+		m_RemarkView = mInflater.inflate(R.layout.layout_remark, null);
+		mEditText = (EditText)m_RemarkView.findViewById(R.id.id_edit_remark);
+		m_RemarkView.findViewById(R.id.id_imageButton_ok).setOnClickListener(this);
+		m_RemarkView.findViewById(R.id.id_imageButton_cancel).setOnClickListener(this);
 
 		showKeyBoard(view);
 	}
 
 	private void initDatas()
 	{
+		Common.mTvType.setText(ControlCenter.GetPayBillTypes().get(0).strName);
+		Common.mImgType.setImageResource(ControlCenter.GetPayBillTypes().get(0).nPicture);
+
 		mFragmentList = new ArrayList<>();
 		FragmentIncomeType fragmentIncomeType = new FragmentIncomeType();
 		FragmentPayType fragmentPayType = new FragmentPayType();
 
-		mFragmentList.add(fragmentIncomeType);
 		mFragmentList.add(fragmentPayType);
+		mFragmentList.add(fragmentIncomeType);
 
 		mViewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager(), mFragmentList);
 		mCalculator = new Calculator();
-
-		calendar = Calendar.getInstance();
-		year = calendar.get(Calendar.YEAR);
-		month = calendar.get(Calendar.MONTH);
-		day = calendar.get(Calendar.DAY_OF_MONTH);
+		if(Common.mRecordItemDetails == null)
+			Common.mRecordItemDetails = new RecordItemDetails();
 	}
 
 	private void initEvents()
@@ -162,11 +191,13 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 				{
 					mBtnPay.setTextColor(getResources().getColor(R.color.blues));
 					mBtnIncome.setTextColor(getResources().getColor(R.color.black));
+					bIsPay= true;
 				}
 				else if(position == 1)
 				{
 					mBtnIncome.setTextColor(getResources().getColor(R.color.blues));
 					mBtnPay.setTextColor(getResources().getColor(R.color.black));
+					bIsPay = false;
 				}
 			}
 
@@ -225,8 +256,30 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 			case R.id.id_btn_remark:
 			{
 				Log.d("hehe", "id_btn_remark");
+				showRemarkPopupWindow(mRootView);
+				popupInputMethodWindow();
 			}
 			break;
+			case R.id.id_imageButton_ok:
+			{
+				String strTemp = mEditText.getText().toString();
+				Common.mRecordItemDetails.strRemark = strTemp;
+				mEditText.setText("");
+
+				imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+				m_RemarkPopupWindow.dismiss();
+			}
+			break;
+			case R.id.id_imageButton_cancel:
+			{
+				mEditText.setText("");
+				Common.mRecordItemDetails.strRemark = "";
+
+				imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+				m_RemarkPopupWindow.dismiss();
+			}
+			break;
+
 			case R.id.id_btn_seven:
 			case R.id.id_btn_eight:
 			case R.id.id_btn_nine:
@@ -267,23 +320,47 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 			case R.id.id_btn_ac:
 			case R.id.id_btn_ok:
 			{
-				mCalculator.reset();
-
-				strMoney = mCalculator.getResult();
-				strBigFormula = mCalculator.getResult();
-				strSmallFormula = mCalculator.getFormula();
-
-				mTvMoney.setText(strMoney);
-				mTvBigMoney.setText(strBigFormula);
-				mTvSmallMoney.setText(strSmallFormula);
-
-				mTvMoney.setVisibility(View.VISIBLE);
-				mLayout.setVisibility(View.GONE);
-
-				if(view.getId() == R.id.id_btn_ok)
+				Double d = Double.valueOf(strMoney);
+				if(d <= 0)
+					Toast.makeText(mInflater.getContext(), "金额不能为0", Toast.LENGTH_SHORT).show();
+				else
 				{
-					fragmentCallBack.callbackFun(null);
-					mKeyBoardPopWindow.dismiss();
+					new Thread(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							if(bIsPay)
+								Common.mRecordItemDetails.dPayMoney = Double.valueOf(strMoney);
+							else
+								Common.mRecordItemDetails.dIncomeMoney = Double.valueOf(strMoney);
+
+							String strTemp = mEditText.getText().toString();
+							Common.mRecordItemDetails.strRemark = strTemp;
+
+							ControlCenter.AddARecordItem(Common.mRecordItemDetails);
+							ControlCenter.GetRecordItemDetails();
+							Common.mAddFinish = true;
+							mCalculator.reset();
+
+							strMoney = mCalculator.getResult();
+							strBigFormula = mCalculator.getResult();
+							strSmallFormula = mCalculator.getFormula();
+
+							mTvMoney.setText(strMoney);
+							mTvBigMoney.setText(strBigFormula);
+							mTvSmallMoney.setText(strSmallFormula);
+
+							mTvMoney.setVisibility(View.VISIBLE);
+							mLayout.setVisibility(View.GONE);
+						}
+					}).start();
+
+					if(view.getId() == R.id.id_btn_ok)
+					{
+						fragmentCallBack.callbackFun(null);
+						mKeyBoardPopWindow.dismiss();
+					}
 				}
 			}
 			break;
@@ -313,6 +390,14 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 		mKeyBoardPopWindow.setFocusable(true);
 		mKeyBoardPopWindow.showAtLocation(parent, Gravity.BOTTOM, 0, 0);
 		mKeyBoardPopWindow.setAnimationStyle(R.style.popwindow_anim_style);
+		mKeyBoardPopWindow.setOnDismissListener(new PopupWindow.OnDismissListener()
+		{
+			@Override
+			public void onDismiss()
+			{
+//				fragmentCallBack.callbackFun(null);
+			}
+		});
 	}
 
 	private void initKeyBoardPopWindowEvent(View view)
@@ -321,9 +406,15 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 		SimpleDateFormat sfYear = new SimpleDateFormat("M月d日");
 		String strTime = sfYear.format(calendar.getTime());
 
-		Button btn = (Button)view.findViewById(R.id.id_btn_calender);
-		btn.setText(strTime);
-		btn.setOnClickListener(this);
+		mBtnTime = (Button)view.findViewById(R.id.id_btn_calender);
+		mBtnTime.setText(strTime);
+		mBtnTime.setOnClickListener(this);
+
+		if(Common.mRecordItemDetails == null)
+			Common.mRecordItemDetails = new RecordItemDetails();
+		Common.mRecordItemDetails.nYear = calendar.get(Calendar.YEAR);
+		Common.mRecordItemDetails.nMonth = calendar.get(Calendar.MONTH) + 1;
+		Common.mRecordItemDetails.nDay = calendar.get(Calendar.DATE);
 
 		view.findViewById(R.id.id_btn_cash).setOnClickListener(this);
 		view.findViewById(R.id.id_btn_member).setOnClickListener(this);
@@ -369,6 +460,8 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 			{
 				if(m_AccountPopupWindow != null)
 					m_AccountPopupWindow.dismiss();
+
+				Common.mRecordItemDetails.nWalletTypeId = ControlCenter.GetWalletTypes().get(position).nWalletTypeID;
 			}
 		});
 	}
@@ -385,23 +478,26 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 				public void onSelectedDayChange(CalendarView calendarView, int i, int i1, int i2)
 				{
 					String strTime = Integer.toString(i1 + 1) + "月" + Integer.toString(i2) + "日";
-					year = i;
-					month = i1 + 1;
-					day = i2;
+					int year = i;
+					int month = i1 + 1;
+					int day = i2;
 
 					Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
-
+									//  当前    		选择
 					if(calendar.get(Calendar.YEAR) < year)
 					{
 						Toast.makeText(mInflater.getContext(), "日期不能超过今年", Toast.LENGTH_SHORT).show();
 						return;
 					}
-					else if(Calendar.YEAR >= year && calendar.get(Calendar.MONTH) + 1 < month)
+					else if(calendar.get(Calendar.YEAR) < year &&
+							calendar.get(Calendar.MONTH) + 1 < month)
 					{
 						Toast.makeText(mInflater.getContext(), "日期不能超过当月", Toast.LENGTH_SHORT).show();
 						return;
 					}
-					else if(Calendar.YEAR >= year && calendar.get(Calendar.MONTH) + 1 >= month && calendar.get(Calendar.DATE) < day)
+					else if(calendar.get(Calendar.YEAR) < year &&
+							calendar.get(Calendar.MONTH) + 1 < month &&
+							calendar.get(Calendar.DATE) < day)
 					{
 						Toast.makeText(mInflater.getContext(), "日期不能超过今天", Toast.LENGTH_SHORT).show();
 						return;
@@ -411,6 +507,10 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 						Toast.makeText(mInflater.getContext(), "选择了: " + year + "年" + month + "月" + day + "日", Toast.LENGTH_SHORT).show();
 						mBtnTime.setText(strTime);
 						mCalenderPopWindow.dismiss();
+
+						Common.mRecordItemDetails.nYear = year;
+						Common.mRecordItemDetails.nMonth = month;
+						Common.mRecordItemDetails.nDay = day;
 					}
 				}
 			});
@@ -420,23 +520,18 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 		mCalenderPopWindow.setOutsideTouchable(true);
 		mCalenderPopWindow.setFocusable(true);
 		mCalenderPopWindow.showAtLocation(parent, Gravity.BOTTOM, 0, 0);
-		mCalenderPopWindow.setAnimationStyle(R.style.popwindow_anim_style);
 	}
 
 	private void showMemberPopupWindow(View parent)
 	{
 		if(m_MemberPopupWindow == null)
-		{
-			m_MemberView = mInflater.inflate(R.layout.group_list, null);
-			TextView tv = (TextView)m_MemberView.findViewById(R.id.title);
-			tv.setText("成员");
-			lv_member_group = (ListView)m_MemberView.findViewById(R.id.lvGroup);
 			m_MemberPopupWindow = new PopupWindow(m_MemberView, LinearLayout.LayoutParams.MATCH_PARENT, 500);
-		}
 
 		m_MemberPopupWindow.setFocusable(true);
 		m_MemberPopupWindow.setOutsideTouchable(true);
 		m_MemberPopupWindow.showAtLocation(parent, Gravity.BOTTOM, 0, 0);
+
+		lv_member_group.setAdapter(new MemberGroupAdapter(mInflater.getContext(), R.layout.group_member_view, ControlCenter.GetMemberTypes()));
 
 		lv_member_group.setOnItemClickListener(new AdapterView.OnItemClickListener()
 		{
@@ -445,7 +540,48 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 			{
 				if(m_MemberPopupWindow != null)
 					m_MemberPopupWindow.dismiss();
+
+				TextView tv = (TextView)m_MemberView.findViewById(R.id.title);
+
+				Common.mRecordItemDetails.strMember = tv.getText().toString();
 			}
 		});
+	}
+
+	private void showRemarkPopupWindow(View parent)
+	{
+		if(m_RemarkPopupWindow == null)
+			m_RemarkPopupWindow = new PopupWindow(m_RemarkView, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+		m_RemarkPopupWindow.setFocusable(true);
+		m_RemarkPopupWindow.setOutsideTouchable(true);
+		m_RemarkPopupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+		m_RemarkPopupWindow.showAtLocation(parent, Gravity.BOTTOM, 0, 0);
+
+		m_RemarkPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener()
+		{
+			@Override
+			public void onDismiss()
+			{
+				boolean isOpen = imm.isActive();
+				if(!isOpen)
+					imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+				Log.d("hehe", "onDismiss " + isOpen);
+			}
+		});
+	}
+
+	private void popupInputMethodWindow()
+	{
+		Handler handler = new Handler();
+		handler.postDelayed(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				imm = (InputMethodManager)mInflater.getContext().getSystemService(Service.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(mEditText, InputMethodManager.HIDE_NOT_ALWAYS);
+			}
+		}, 0);
 	}
 }
