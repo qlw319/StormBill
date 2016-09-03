@@ -27,7 +27,7 @@ public class ControlCenter
 
 	public static boolean Initialization(Context context)
 	{
-		if(m_bInitialization == true)
+		if(m_bInitialization)
 			return false;
 
 		m_bInitialization = true;
@@ -38,6 +38,7 @@ public class ControlCenter
 		m_arrIncomeBillTypes = new ArrayList<>();
 		m_arrPayBillTypes = new ArrayList<>();
 		m_arrRecordItemDetails = new ArrayList<>();
+		m_arrDateInformation = new ArrayList<>();
 
 		m_SQLiteManager.LoadAllMembers(m_arrMemberTypes);
 		WalletTypeManager.LoadWalletType(m_arrWalletTypes, m_SQLiteManager);
@@ -58,6 +59,7 @@ public class ControlCenter
 		m_arrIncomeBillTypes.clear();
 		m_arrPayBillTypes.clear();
 		m_arrRecordItemDetails.clear();
+		m_arrDateInformation.clear();
 		return true;
 	}
 
