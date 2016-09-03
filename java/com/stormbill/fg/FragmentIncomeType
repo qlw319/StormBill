@@ -15,6 +15,7 @@ import com.stormbill.stormbill.R;
 import com.stormbill.stormbill.adapter.GridViewAdapter;
 import com.stormbill.stormbill.bean.GridEntity;
 import com.stormbill.stormbill.common.Common;
+import com.stormbill.stormbill.datastructs.ControlCenter;
 
 import java.util.ArrayList;
 
@@ -22,7 +23,6 @@ public class FragmentIncomeType extends Fragment
 {
 	private LayoutInflater mInflater;
 	private GridView mGridView;
-	private ArrayList<GridEntity> mDatas;
 	private GridViewAdapter mAdapter;
 	private View mBaseView;
 
@@ -50,13 +50,7 @@ public class FragmentIncomeType extends Fragment
 
 	private void initDatas()
 	{
-		mDatas = new ArrayList<>();
-		for(int i = 0; i < 40; i++)
-		{
-			GridEntity gridEntity = new GridEntity(R.drawable.circle_red, Integer.toString(i));
-			mDatas.add(gridEntity);
-		}
-		mAdapter = new GridViewAdapter(mInflater.getContext(), R.layout.fg_jiyibi_gridview_item, mDatas);
+		mAdapter = new GridViewAdapter(mInflater.getContext(), R.layout.fg_jiyibi_gridview_item, ControlCenter.GetIncomeBillTypes());
 	}
 
 	private void initEvents()
@@ -75,6 +69,8 @@ public class FragmentIncomeType extends Fragment
 				Common.mTvType.setText(strType);
 				Common.mImgType.setImageResource(nResid);
 				Common.mImgType.setTag(nResid);
+
+				Common.mRecordItemDetails.nBillTypeId = i;
 			}
 		});
 	}
