@@ -102,31 +102,31 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 				{
 					case R.id.id_tab1:
 					{
-						mImgView1.setBackgroundResource(R.drawable.circle_greed);
-						mText1.setTextColor(Color.GREEN);
+						mImgView1.setBackgroundResource(R.mipmap.mingxi_2);
+						mText1.setTextColor(getResources().getColor(R.color.bar_text));
 					}
 					break;
 					case R.id.id_tab2:
 					{
-						mImgView2.setBackgroundResource(R.drawable.circle_greed);
-						mText2.setTextColor(Color.GREEN);
+						mImgView2.setBackgroundResource(R.mipmap.tubiao_2);
+						mText2.setTextColor(getResources().getColor(R.color.bar_text));
 					}
 					break;
 					case R.id.id_tab3:
 					{
-						mImgView3.setBackgroundResource(R.drawable.circle_greed);
+						mImgView3.setBackgroundResource(R.mipmap.jizhang);
 					}
 					break;
 					case R.id.id_tab4:
 					{
-						mImgView4.setBackgroundResource(R.drawable.circle_greed);
-						mText4.setTextColor(Color.GREEN);
+						mImgView4.setBackgroundResource(R.mipmap.rili_2);
+						mText4.setTextColor(getResources().getColor(R.color.bar_text));
 					}
 					break;
 					case R.id.id_tab5:
 					{
-						mImgView5.setBackgroundResource(R.drawable.circle_greed);
-						mText5.setTextColor(Color.GREEN);
+						mImgView5.setBackgroundResource(R.mipmap.shezhi_2);
+						mText5.setTextColor(getResources().getColor(R.color.bar_text));
 					}
 					break;
 					default:
@@ -140,35 +140,34 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 				{
 					case R.id.id_tab1:
 					{
-						mImgView1.setBackgroundResource(R.drawable.circle_blue);
-						mText1.setTextColor(Color.BLUE);
+						mImgView1.setBackgroundResource(R.mipmap.mingxi_2);
+						mText1.setTextColor(getResources().getColor(R.color.bar_text));
 						setSelect(0);
 					}
 					break;
 					case R.id.id_tab2:
 					{
-						mImgView2.setBackgroundResource(R.drawable.circle_blue);
-						mText2.setTextColor(Color.BLUE);
+						mImgView2.setBackgroundResource(R.mipmap.tubiao_2);
+						mText2.setTextColor(getResources().getColor(R.color.bar_text));
 						setSelect(1);
 					}
 					break;
 					case R.id.id_tab3:
 					{
-						mImgView3.setBackgroundResource(R.drawable.circle_blue);
 						setSelect(2);
 					}
 					break;
 					case R.id.id_tab4:
 					{
-						mImgView4.setBackgroundResource(R.drawable.circle_blue);
-						mText4.setTextColor(Color.BLUE);
+						mImgView4.setBackgroundResource(R.mipmap.rili_2);
+						mText4.setTextColor(getResources().getColor(R.color.bar_text));
 						setSelect(3);
 					}
 					break;
 					case R.id.id_tab5:
 					{
-						mImgView5.setBackgroundResource(R.drawable.circle_blue);
-						mText5.setTextColor(Color.BLUE);
+						mImgView5.setBackgroundResource(R.mipmap.shezhi_2);
+						mText5.setTextColor(getResources().getColor(R.color.bar_text));
 						setSelect(4);
 					}
 					break;
@@ -202,8 +201,8 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 					fragmentTransaction.show(mFragmentMingXiPage);
 
 				mTabBar.setVisibility(View.VISIBLE);
-				mImgView1.setBackgroundResource(R.drawable.circle_blue);
-				mText1.setTextColor(Color.BLUE);
+				mImgView1.setBackgroundResource(R.mipmap.mingxi_2);
+				mText1.setTextColor(getResources().getColor(R.color.bar_text));
 			}
 			break;
 
@@ -217,9 +216,8 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 				else
 					fragmentTransaction.show(mFragmentAccountPage);
 
-				mImgView2.setBackgroundResource(R.drawable.circle_blue);
-				mText2.setTextColor(Color.BLUE);
-
+				mImgView2.setBackgroundResource(R.mipmap.tubiao_2);
+				mText2.setTextColor(getResources().getColor(R.color.bar_text));
 			}
 			break;
 			case 2:
@@ -263,18 +261,18 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 
 	void resetImg()
 	{
-		mImgView1.setBackgroundResource(R.drawable.circle_gray);
+		mImgView1.setBackgroundResource(R.mipmap.mingxi_1);
 		mText1.setTextColor(Color.GRAY);
 
-		mImgView2.setBackgroundResource(R.drawable.circle_gray);
+		mImgView2.setBackgroundResource(R.mipmap.tubiao_1);
 		mText2.setTextColor(Color.GRAY);
 
-		mImgView3.setBackgroundResource(R.drawable.circle_gray);
+		mImgView3.setBackgroundResource(R.mipmap.jizhang);
 
-		mImgView4.setBackgroundResource(R.drawable.circle_gray);
+		mImgView4.setBackgroundResource(R.mipmap.rili_1);
 		mText4.setTextColor(Color.GRAY);
 
-		mImgView5.setBackgroundResource(R.drawable.circle_gray);
+		mImgView5.setBackgroundResource(R.mipmap.shezhi_1);
 		mText5.setTextColor(Color.GRAY);
 	}
 
