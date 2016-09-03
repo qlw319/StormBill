@@ -2,16 +2,27 @@ package com.stormbill.stormbill.fg;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.stormbill.stormbill.bean.Bean;
 import com.stormbill.stormbill.adapter.MingXiAdapter;
 import com.stormbill.stormbill.R;
+import com.stormbill.stormbill.common.Common;
+import com.stormbill.stormbill.common_type.IncomeAndPay;
+import com.stormbill.stormbill.data_manager.DateInforManager;
+import com.stormbill.stormbill.datastructs.ControlCenter;
 
 public class FragmentMingXi extends Fragment
 {
@@ -22,6 +33,10 @@ public class FragmentMingXi extends Fragment
 	private View 				mFooterView;
 	private View				mSearchView;
 	private View				mTitleView;
+	private ProgressBar 		mProgressBar;
+	private int					mCurProgress;
+	private TextView			mTvPaymoney;
+	private TextView			mTvIncomeMoney;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -39,6 +54,18 @@ public class FragmentMingXi extends Fragment
 		initEvents();
 	}
 
+	@Override
+	public void onHiddenChanged(boolean hidden)
+	{
+		if(!hidden)
+		{
+			Log.d("hehe", "onHiddenChanged");
+			mAdapter.notifyDataSetChanged();
+
+			setPayAndIncome();
+		}
+	}
+
 	private void initViews(View view)
 	{
 		mListView = (ListView)view.findViewById(R.id.fg_mingxi_listView);
@@ -51,20 +78,22 @@ public class FragmentMingXi extends Fragment
 
 		mListView.addHeaderView(mHeaderView);
 		mListView.addFooterView(mFooterView);
+
+		mProgressBar = (ProgressBar)view.findViewById(R.id.id_progressbar);
+
+		mTvPaymoney = (TextView)view.findViewById(R.id.id_top_textView_expenditure_money);
+		mTvIncomeMoney = (TextView)view.findViewById(R.id.id_top_textView_income_money);
 	}
 
 	private void initDatas()
 	{
-		// test data
-		Bean bean = new Bean();
-		List<Bean> beanList = new ArrayList<>();
-		for(int i = 0; i < 20; i++)
-		{
-			bean.type = i % 2;
-			beanList.add(bean);
-		}
+		mCurProgress = 0;
 
-		mAdapter = new MingXiAdapter(mInflater.getContext() ,R.layout.fg_mingxi_item, beanList);
+		mAdapter = new MingXiAdapter(mInflater.getContext() ,R.layout.fg_mingxi_item, ControlCenter.GetRecordItemDetails());
+
+		setCurProgress(50);
+
+		setPayAndIncome();
 	}
 
 	private void initEvents()
@@ -72,5 +101,19 @@ public class FragmentMingXi extends Fragment
 		mListView.setAdapter(mAdapter);
 		mAdapter.notifyDataSetChanged();
 		mListView.setOverScrollMode(View.OVER_SCROLL_NEVER);// 去掉回弹阴影效果
+	}
+
+	public void setPayAndIncome()
+	{
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+		IncomeAndPay incomeAndPay =  DateInforManager.GetLastMonthIncomeAndPay(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
+		mTvPaymoney.setText(String.valueOf(incomeAndPay.dPay));
+		mTvIncomeMoney.setText(String.valueOf(incomeAndPay.dIncome));
+	}
+
+	private void setCurProgress(int progress)
+	{
+		mCurProgress = progress;
+		mProgressBar.setProgress(mCurProgress);
 	}
 }
