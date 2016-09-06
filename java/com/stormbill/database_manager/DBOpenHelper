@@ -14,6 +14,7 @@ import com.stormbill.stormbill.common_type.WalletTypes;
 import java.io.File;
 import java.util.ArrayList;
 
+import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitAccountTypes;
 import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitIncomeTypesName;
 import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitIncomeTypesPicture;
 import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitMembers;
@@ -42,6 +43,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 
 	public void Release()
 	{
+		m_bInitForDBFirstCreate = false;
 		m_dbRead.close();
 		m_dbWrite.close();
 	}
@@ -78,8 +80,6 @@ public class DBOpenHelper extends SQLiteOpenHelper
 
 		String sq4 = "CREATE TABLE IF NOT EXISTS wallet_type_tab (" +
 				"    wallet_name 		TEXT	NOT NULL," +
-				"    wallet_layout 		TEXT	NOT NULL," +
-				"    wallet_color 		TEXT	NOT NULL," +
 				"    wallet_id	 		INT	NOT NULL);";
 
 		String sq5 = "CREATE TABLE IF NOT EXISTS member_tab (" + "   member_name	 TEXT	NOT NULL);";
@@ -156,6 +156,12 @@ public class DBOpenHelper extends SQLiteOpenHelper
 	// Initialization wallet_type_tab
 	private void InitializationWalletTypeTab()
 	{
+		for(int i = 0; i < InitAccountTypes.length; ++i)
+		{
+			WalletTypes walletTypes = new WalletTypes();
+			walletTypes.strName = InitAccountTypes[i];
+			AddWalletTypeTab(walletTypes);
+		}
 	}
 
 	// Initialization member_tab
@@ -755,7 +761,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 	public boolean AddWalletTypeTab(WalletTypes ddt)
 	{
 		String sql1 = "select * from wallet_type_tab";
-		String sql2 = "insert into wallet_type_tab (wallet_name, wallet_layout, wallet_color, wallet_id) values(?,?,?,?)";
+		String sql2 = "insert into wallet_type_tab (wallet_name, wallet_id) values(?,?)";
 
 		int nCountBefore = 0;
 		Cursor cursor = m_dbRead.rawQuery(sql1, null);
@@ -770,8 +776,6 @@ public class DBOpenHelper extends SQLiteOpenHelper
 		{
 			m_dbWrite.execSQL(sql2, new Object[]{
 					ddt.strName,
-					ddt.strLayoutName,
-					ddt.strColor,
 					ddt.nWalletTypeID
 			});
 			m_dbWrite.setTransactionSuccessful();
@@ -827,8 +831,6 @@ public class DBOpenHelper extends SQLiteOpenHelper
 		{
 			WalletTypes newddt = new WalletTypes();
 			newddt.strName = cursor.getString(cursor.getColumnIndex("wallet_name"));
-			newddt.strLayoutName = cursor.getString(cursor.getColumnIndex("wallet_layout"));
-			newddt.strColor = cursor.getString(cursor.getColumnIndex("wallet_color"));
 			newddt.nWalletTypeID = cursor.getInt(cursor.getColumnIndex("wallet_id"));
 
 			cursor.close();
@@ -841,7 +843,7 @@ public class DBOpenHelper extends SQLiteOpenHelper
 	public boolean UpdateWalletTypeTab(WalletTypes ddt)
 	{
 		String sql = "update wallet_type_tab " +
-				"set wallet_name=?,wallet_layout=?,wallet_color=?" +
+				"set wallet_name=?" +
 				"where wallet_id=?";
 
 		if(FindInWalletTypeTab(ddt) != null)
@@ -852,8 +854,6 @@ public class DBOpenHelper extends SQLiteOpenHelper
 		{
 			m_dbWrite.execSQL(sql, new Object[]{
 					ddt.strName,
-					ddt.strLayoutName,
-					ddt.strColor,
 					ddt.nWalletTypeID
 			});
 			m_dbWrite.setTransactionSuccessful();
@@ -885,8 +885,6 @@ public class DBOpenHelper extends SQLiteOpenHelper
 			WalletTypes item = new WalletTypes();
 
 			item.strName = cursor.getString(cursor.getColumnIndex("wallet_name"));
-			item.strLayoutName = cursor.getString(cursor.getColumnIndex("wallet_layout"));
-			item.strColor = cursor.getString(cursor.getColumnIndex("wallet_color"));
 			item.nWalletTypeID = cursor.getInt(cursor.getColumnIndex("wallet_id"));
 			arrWalletTypesList.add(item);
 			cursor.moveToNext();
