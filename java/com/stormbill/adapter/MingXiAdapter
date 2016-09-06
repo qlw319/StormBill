@@ -1,19 +1,31 @@
 package com.stormbill.stormbill.adapter;
 
 import android.content.Context;
+import android.icu.text.DecimalFormat;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.stormbill.stormbill.R;
 import com.stormbill.stormbill.common_type.RecordItemDetails;
+import com.stormbill.stormbill.data_manager.RecordItemDetailManager;
 import com.stormbill.stormbill.initialization_information.CommonInitInfor;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitIncomeTypesName;
 import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitPayTypesName;
 
 public class MingXiAdapter extends CommonAdapter<RecordItemDetails>
 {
+	private static final int TYPE_YEAR_MONTH = 0;
+	private static final int TYPE_DAY = 1;
+	private static final int TYPE_PAY_INCOME = 2;
+
 	public MingXiAdapter(Context context, int layoutId, List<RecordItemDetails> datas)
 	{
 		super(context, layoutId, datas);
@@ -22,29 +34,114 @@ public class MingXiAdapter extends CommonAdapter<RecordItemDetails>
 	@Override
 	public void convertView(ViewHolder holder, RecordItemDetails recordItemDetails)
 	{
-		if(recordItemDetails.dPayMoney > 0)
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+		int curType = 0;
+		if(recordItemDetails.nYear != 0 && recordItemDetails.nMonth != 0 && recordItemDetails.nDay == 0)
+			curType =  TYPE_YEAR_MONTH;
+		else if(recordItemDetails.nYear == 0 && recordItemDetails.nMonth == 0 && recordItemDetails.nDay != 0)
+			curType =  TYPE_DAY;
+		else
+			curType =  TYPE_PAY_INCOME;
+
+		switch(curType)
 		{
-			holder.setText(R.id.id_pay_type, InitPayTypesName[recordItemDetails.nBillTypeId]).setText(R.id.id_tv_pay_remark, recordItemDetails.strRemark).setText(R.id.id_tv_pay_money, String.valueOf(recordItemDetails.dPayMoney)).setImage(R.id.id_imageView_type, CommonInitInfor.InitPayTypesPicture[recordItemDetails.nBillTypeId]);
+			case TYPE_YEAR_MONTH:
+			{
+				holder.getView(R.id.id_layout_year_and_month).setVisibility(View.VISIBLE);
+				holder.getView(R.id.id_layout_pay_or_income).setVisibility(View.GONE);
+				holder.getView(R.id.id_layout_day).setVisibility(View.GONE);
 
-			holder.getView(R.id.id_income_type).setVisibility(View.GONE);
-			holder.getView(R.id.id_tv_income_remark).setVisibility(View.GONE);
-			holder.getView(R.id.id_tv_income_money).setVisibility(View.GONE);
+				if(calendar.get(Calendar.YEAR) == recordItemDetails.nYear)
+				{
+					String strTime = String.valueOf(recordItemDetails.nMonth) + "月";
+					holder.setText(R.id.id_time_line_year_month, strTime);
+				}
+				else
+				{
+					String strTime = String.valueOf(recordItemDetails.nYear) + "年";
+					strTime += String.valueOf(recordItemDetails.nMonth) + "月";
+					holder.setText(R.id.id_time_line_year_month, strTime);
+				}
 
-			holder.getView(R.id.id_pay_type).setVisibility(View.VISIBLE);
-			holder.getView(R.id.id_tv_pay_remark).setVisibility(View.VISIBLE);
-			holder.getView(R.id.id_tv_pay_money).setVisibility(View.VISIBLE);
-		}
-		else if(recordItemDetails.dIncomeMoney > 0)
-		{
-			holder.setText(R.id.id_income_type, InitIncomeTypesName[recordItemDetails.nBillTypeId]).setText(R.id.id_tv_income_remark, recordItemDetails.strRemark).setText(R.id.id_tv_income_money, String.valueOf(recordItemDetails.dIncomeMoney)).setImage(R.id.id_imageView_type, CommonInitInfor.InitIncomeTypesPicture[recordItemDetails.nBillTypeId]);
+			}
+			break;
+			case TYPE_DAY:
+			{
+				holder.getView(R.id.id_layout_year_and_month).setVisibility(View.GONE);
+				holder.getView(R.id.id_layout_pay_or_income).setVisibility(View.GONE);
+				holder.getView(R.id.id_layout_day).setVisibility(View.VISIBLE);
 
-			holder.getView(R.id.id_pay_type).setVisibility(View.GONE);
-			holder.getView(R.id.id_tv_pay_remark).setVisibility(View.GONE);
-			holder.getView(R.id.id_tv_pay_money).setVisibility(View.GONE);
+				if(recordItemDetails.dIncomeMoney > 0)
+				{
 
-			holder.getView(R.id.id_income_type).setVisibility(View.VISIBLE);
-			holder.getView(R.id.id_tv_income_remark).setVisibility(View.VISIBLE);
-			holder.getView(R.id.id_tv_income_money).setVisibility(View.VISIBLE);
+					holder.setText(R.id.id_tv_time_line_income_money, String.format("%.2f", recordItemDetails.dIncomeMoney));
+					holder.getView(R.id.id_time_line_day_income_type).setVisibility(View.VISIBLE);
+					holder.getView(R.id.id_tv_time_line_income_money).setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					holder.getView(R.id.id_time_line_day_income_type).setVisibility(View.GONE);
+					holder.getView(R.id.id_tv_time_line_income_money).setVisibility(View.GONE);
+				}
+
+				if(recordItemDetails.dPayMoney > 0)
+				{
+					holder.setText(R.id.id_tv_time_line_pay_money, String.format("%.2f", recordItemDetails.dPayMoney));
+					holder.getView(R.id.id_time_line_pay_type).setVisibility(View.VISIBLE);
+					holder.getView(R.id.id_tv_time_line_pay_money).setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					holder.getView(R.id.id_time_line_pay_type).setVisibility(View.GONE);
+					holder.getView(R.id.id_tv_time_line_pay_money).setVisibility(View.GONE);
+				}
+
+				if(recordItemDetails.nDay != 0)
+					holder.setText(R.id.id_tv_day, String.valueOf(recordItemDetails.nDay) + "日");
+				if(calendar.get(Calendar.DATE) == recordItemDetails.nDay)
+					holder.setText(R.id.id_tv_day, "今日");
+				if(calendar.get(Calendar.DATE) == recordItemDetails.nDay + 1)
+					holder.setText(R.id.id_tv_day, "昨日");
+			}
+			break;
+			case TYPE_PAY_INCOME:
+			{
+				holder.getView(R.id.id_layout_year_and_month).setVisibility(View.GONE);
+				holder.getView(R.id.id_layout_pay_or_income).setVisibility(View.VISIBLE);
+				holder.getView(R.id.id_layout_day).setVisibility(View.GONE);
+
+				if(recordItemDetails.dPayMoney > 0)
+				{
+					holder.setText(R.id.id_pay_type, InitPayTypesName[recordItemDetails.nBillTypeId])
+							.setText(R.id.id_tv_pay_remark, recordItemDetails.strRemark)
+							.setText(R.id.id_tv_pay_money, String.format("%.2f", recordItemDetails.dPayMoney))
+							.setImage(R.id.id_imageView_type, CommonInitInfor.InitPayTypesPicture[recordItemDetails.nBillTypeId]);
+
+					holder.getView(R.id.id_income_type).setVisibility(View.GONE);
+					holder.getView(R.id.id_tv_income_remark).setVisibility(View.GONE);
+					holder.getView(R.id.id_tv_income_money).setVisibility(View.GONE);
+
+					holder.getView(R.id.id_pay_type).setVisibility(View.VISIBLE);
+					holder.getView(R.id.id_tv_pay_remark).setVisibility(View.VISIBLE);
+					holder.getView(R.id.id_tv_pay_money).setVisibility(View.VISIBLE);
+				}
+				else if(recordItemDetails.dIncomeMoney > 0)
+				{
+					holder.setText(R.id.id_income_type, InitIncomeTypesName[recordItemDetails.nBillTypeId])
+							.setText(R.id.id_tv_income_remark, recordItemDetails.strRemark)
+							.setText(R.id.id_tv_income_money, String.format("%.2f", recordItemDetails.dIncomeMoney))
+							.setImage(R.id.id_imageView_type, CommonInitInfor.InitIncomeTypesPicture[recordItemDetails.nBillTypeId]);
+
+					holder.getView(R.id.id_pay_type).setVisibility(View.GONE);
+					holder.getView(R.id.id_tv_pay_remark).setVisibility(View.GONE);
+					holder.getView(R.id.id_tv_pay_money).setVisibility(View.GONE);
+
+					holder.getView(R.id.id_income_type).setVisibility(View.VISIBLE);
+					holder.getView(R.id.id_tv_income_remark).setVisibility(View.VISIBLE);
+					holder.getView(R.id.id_tv_income_money).setVisibility(View.VISIBLE);
+				}
+			}
+			break;
 		}
 	}
 }
