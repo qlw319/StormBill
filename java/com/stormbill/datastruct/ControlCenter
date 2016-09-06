@@ -7,6 +7,7 @@ import com.stormbill.stormbill.common_type.DateInformation;
 import com.stormbill.stormbill.common_type.RecordItemDetails;
 import com.stormbill.stormbill.common_type.WalletTypes;
 import com.stormbill.stormbill.data_manager.BillTypeManager;
+import com.stormbill.stormbill.data_manager.DateInforManager;
 import com.stormbill.stormbill.data_manager.RecordItemDetailManager;
 import com.stormbill.stormbill.data_manager.WalletTypeManager;
 import com.stormbill.stormbill.database_manager.SQLiteDatabaseManager;
@@ -43,7 +44,9 @@ public class ControlCenter
 		m_SQLiteManager.LoadAllMembers(m_arrMemberTypes);
 		WalletTypeManager.LoadWalletType(m_arrWalletTypes, m_SQLiteManager);
 		BillTypeManager.LoadBillType(m_arrIncomeBillTypes, m_arrPayBillTypes, m_SQLiteManager);
-		RecordItemDetailManager.LoadRecordItem(m_arrRecordItemDetails, m_SQLiteManager);
+		if(RecordItemDetailManager.LoadRecordItem(m_arrRecordItemDetails, m_SQLiteManager))
+			DateInforManager.ImportDateInfo();
+
 		return true;
 	}
 
