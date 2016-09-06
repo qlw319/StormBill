@@ -18,6 +18,5 @@ public class BillTypes
 		if(strName != other.strName)
 			strName = other.strName;
 		nPicture = other.nPicture;
-		nBillTypeID = other.nBillTypeID;
 	}
 }
