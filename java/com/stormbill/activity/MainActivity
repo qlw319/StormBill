@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -114,7 +115,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 					break;
 					case R.id.id_tab3:
 					{
-						mImgView3.setBackgroundResource(R.mipmap.jizhang);
+						mImgView3.setBackgroundResource(R.mipmap.jiahao);
 					}
 					break;
 					case R.id.id_tab4:
@@ -267,7 +268,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 		mImgView2.setBackgroundResource(R.mipmap.tubiao_1);
 		mText2.setTextColor(Color.GRAY);
 
-		mImgView3.setBackgroundResource(R.mipmap.jizhang);
+		mImgView3.setBackgroundResource(R.mipmap.jiahao);
 
 		mImgView4.setBackgroundResource(R.mipmap.rili_1);
 		mText4.setTextColor(Color.GRAY);
@@ -305,5 +306,14 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 		}
 		else
 			this.finish();
+	}
+
+	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+
+		ControlCenter.Release();
+		Log.d("hehe", "onDestroy");
 	}
 }
