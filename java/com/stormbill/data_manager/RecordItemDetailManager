@@ -6,6 +6,7 @@ import com.stormbill.stormbill.database_manager.SQLiteDatabaseManager;
 import com.stormbill.stormbill.datastructs.ControlCenter;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import static com.stormbill.stormbill.data_manager.DateInforManager.GetSpecifyDayIncomeAndPay;
 
@@ -18,19 +19,18 @@ public class RecordItemDetailManager
 			return false;
 
 		arrRecordItemDetailsList.clear();
-		boolean bLoadResult = sqLiteDatabaseManager.LoadBillRecords(arrRecordItemDetailsList);
-		if(bLoadResult)
-		{
-//			OrderItemRecords();
-			DateInforManager.ImportDateInfo();
-		}
-
-		return bLoadResult;
+		return sqLiteDatabaseManager.LoadBillRecords(arrRecordItemDetailsList);
 	}
 
 	// 增加一条记录
 	public static boolean AddRecordItem(RecordItemDetails eNewItem, SQLiteDatabaseManager sqLiteDatabaseManager)
 	{
+		if(sqLiteDatabaseManager == null || eNewItem == null)
+			return false;
+
+		if(eNewItem.dIncomeMoney == 0 && eNewItem.dPayMoney == 0)
+			return false;
+
 		boolean bResult = sqLiteDatabaseManager.AddABillRecord(eNewItem);
 		if(bResult == false)
 			return false;
@@ -44,25 +44,13 @@ public class RecordItemDetailManager
 			return true;
 		}
 		return false;
-
-//		int nIndex = FindRecordItemIndex(eNewItem.strTimestamp);
-//		if(nIndex == -1)
-//		{
-//			arrAllRecordList.add(eNewItem);
-//			OrderItemRecords();
-//		}
-//		else
-//			arrAllRecordList.add(nIndex, eNewItem);
-//		DateInforManager.AddSingleRecordItem(eNewItem);
-//
-//		return true;
 	}
 
 	// 删除一条记录
 	public static boolean DeleteRecordItem(RecordItemDetails eItem, SQLiteDatabaseManager sqLiteDatabaseManager)
 	{
 		ArrayList<RecordItemDetails> arrAllRecordList = ControlCenter.GetRecordItemDetails();
-		if(arrAllRecordList == null)
+		if(arrAllRecordList == null || sqLiteDatabaseManager == null)
 			return false;
 
 		int nIndex = FindRecordItemIndex(eItem.strTimestamp);
@@ -89,6 +77,8 @@ public class RecordItemDetailManager
 		if(nIndex == -1)
 			return false;
 
+		if(sqLiteDatabaseManager == null)
+			return false;
 		if(sqLiteDatabaseManager.ModifyABillRecord(eItemModify))
 			return false;
 
@@ -109,10 +99,7 @@ public class RecordItemDetailManager
 			recordItemDetail.nWalletTypeId = eItemModify.nWalletTypeId;
 		}
 		else
-		{
-			sqLiteDatabaseManager.ModifyABillRecord(eItemModify);
 			LoadRecordItem(arrAllRecordList, sqLiteDatabaseManager);
-		}
 
 		DateInforManager.ModifySingleRecordItem(eItemBefore, eItemModify);
 		return true;
@@ -142,7 +129,7 @@ public class RecordItemDetailManager
 	}
 
 	// 获得时光轴所需样式的记录
-	public static ArrayList<RecordItemDetails> GetTimeLineRecordType()
+	public static ArrayList<RecordItemDetails> GetTimeLineRecordList()
 	{
 		ArrayList<RecordItemDetails> arrAllRecordList = ControlCenter.GetRecordItemDetails();
 		if(arrAllRecordList == null)
@@ -152,42 +139,55 @@ public class RecordItemDetailManager
 		int nLastRecordYear = 0;
 		int nLastRecordMonth = 0;
 		int nLastRecordDay = 0;
+		Calendar calendar = Calendar.getInstance();
 		for(int i = 0; i < arrAllRecordList.size(); ++i)
 		{
 			RecordItemDetails tmp = arrAllRecordList.get(i);
 
-			if(tmp.nYear != nLastRecordYear)
+			if(calendar.get(Calendar.YEAR) != tmp.nYear || calendar.get(Calendar.MONTH) + 1 != tmp.nMonth)
 			{
-				RecordItemDetails item = new RecordItemDetails();
-				item.nYear = tmp.nYear;
-				item.nMonth = tmp.nMonth;
-				arrTimeLineRecordList.add(item);
-				nLastRecordYear = tmp.nYear;
-				nLastRecordMonth = tmp.nMonth;
-			}
-			else if(tmp.nMonth != nLastRecordMonth)
-			{
-				RecordItemDetails item = new RecordItemDetails();
-				item.nMonth = tmp.nMonth;
-				arrTimeLineRecordList.add(item);
-				nLastRecordMonth = tmp.nMonth;
+				if(tmp.nYear != nLastRecordYear)
+				{
+					RecordItemDetails item = new RecordItemDetails();
+					item.nYear = tmp.nYear;
+					item.nMonth = tmp.nMonth;
+					arrTimeLineRecordList.add(item);
+				}
+				else if(tmp.nMonth != nLastRecordMonth)
+				{
+					RecordItemDetails item = new RecordItemDetails();
+					item.nYear = tmp.nYear;
+					item.nMonth = tmp.nMonth;
+					arrTimeLineRecordList.add(item);
+				}
 			}
 
-			if(tmp.nDay != nLastRecordDay)
+			if(tmp.nYear != nLastRecordYear || tmp.nMonth != nLastRecordMonth || tmp.nDay != nLastRecordDay)
 			{
 				RecordItemDetails item = new RecordItemDetails();
 				item.nDay = tmp.nDay;
 				IncomeAndPay moneyChange = GetSpecifyDayIncomeAndPay(tmp.nYear, tmp.nMonth, tmp.nDay);
-				item.dPayMoney += moneyChange.dPay;
-				item.dIncomeMoney += moneyChange.dIncome;
+				if(moneyChange != null)
+				{
+					item.dPayMoney = moneyChange.dPay;
+					item.dIncomeMoney = moneyChange.dIncome;
+				}
+				else
+				{
+					item.dPayMoney = 0;
+					item.dIncomeMoney = 0;
+				}
+
 				arrTimeLineRecordList.add(item);
-				nLastRecordDay = tmp.nDay;
 			}
 
 			RecordItemDetails item = new RecordItemDetails();
 			item.Instead(tmp);
-			// 这个地方有可能错了，因为我们需要的是尾插法
 			arrTimeLineRecordList.add(item);
+
+			nLastRecordYear = tmp.nYear;
+			nLastRecordMonth = tmp.nMonth;
+			nLastRecordDay = tmp.nDay;
 		}
 
 		return arrTimeLineRecordList;
