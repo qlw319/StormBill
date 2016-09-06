@@ -49,4 +49,20 @@ public class RecordItemDetails
 
 		return true;
 	}
+
+	public void reset()
+	{
+		nYear = 0;
+		nMonth = 0;
+		nDay = 0;
+		nHour = -1;
+		nMinute = -1;
+		nBillTypeId = 0;
+		nWalletTypeId = 0;
+		dPayMoney = 0;
+		dIncomeMoney = 0;
+		strMember = "";
+		strRemark ="";
+		strTimestamp = "";
+	}
 }
