@@ -13,7 +13,7 @@ public class DateInforManager
 	{
 		ArrayList<RecordItemDetails> arrRecordItemList = ControlCenter.GetRecordItemDetails();
 		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
-		if(arrDateInfoList == null || arrDateInfoList == null)
+		if(arrRecordItemList == null || arrDateInfoList == null)
 			return false;
 
 		arrDateInfoList.clear();
@@ -39,7 +39,7 @@ public class DateInforManager
 				arrDateInfoList.add(item);
 			}
 
-			if(tmp.nYear == nLastRecordYear && tmp.nMonth != nLastRecordMonth && tmp.nDay == nLastRecordDay)
+			if(tmp.nYear == nLastRecordYear && tmp.nMonth == nLastRecordMonth && tmp.nDay == nLastRecordDay)
 			{
 				dIncome += tmp.dIncomeMoney;
 				dPay += tmp.dPayMoney;
@@ -50,8 +50,8 @@ public class DateInforManager
 			DateInformation prev = arrDateInfoList.get(arrDateInfoList.size() - 1);
 			prev.dPay = dPay;
 			prev.dIncome = dIncome;
-			dIncome = 0;
-			dPay = 0;
+			dIncome = tmp.dIncomeMoney;
+			dPay = tmp.dPayMoney;
 
 			//
 			DateInformation item = new DateInformation();
@@ -75,7 +75,7 @@ public class DateInforManager
 	public static boolean AddSingleRecordItem(RecordItemDetails item)
 	{
 		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
-		if(arrDateInfoList == null)
+		if(arrDateInfoList == null || item == null)
 			return false;
 
 		DateInformation dateInformation = GetDateInforByDate(item.nYear, item.nMonth, item.nDay);
@@ -144,7 +144,6 @@ public class DateInforManager
 		if(arrDateInfoList == null)
 			return;
 
-		// 这样写会不会导致越界访问？待究
 		for(int i = 0; i < arrDateInfoList.size(); ++i)
 		{
 			DateInformation tmp = arrDateInfoList.get(i);
@@ -194,13 +193,13 @@ public class DateInforManager
 		return moneyChange;
 	}
 
-	public static IncomeAndPay GetLastMonthIncomeAndPay(int nYear, int nMonth)
+	public static IncomeAndPay GetSpecialMonthIncomeAndPay(int nYear, int nMonth)
 	{
+		IncomeAndPay moneyChange = new IncomeAndPay();
 		ArrayList<DateInformation> arrDateInfoList = ControlCenter.GetDateInfo();
 		if(arrDateInfoList == null)
-			return null;
+			return moneyChange;
 
-		IncomeAndPay moneyChange = null;
 		for(int i = 0; i < arrDateInfoList.size(); ++i)
 		{
 			DateInformation tmp = arrDateInfoList.get(i);
