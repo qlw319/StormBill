@@ -17,9 +17,29 @@ public class WalletTypeManager
 		return sqLiteDatabaseManager.LoadAllWalletType(arrWalletType);
 	}
 
-	public static boolean ChangeName(int nIndex, String strNewName, SQLiteDatabaseManager sqLiteDatabaseManager)
+	public static boolean ModifyType(WalletTypes walletTypes, SQLiteDatabaseManager sqLiteDatabaseManager)
 	{
-		if(strNewName == null || strNewName.length() == 0)
+		if(walletTypes == null || sqLiteDatabaseManager == null)
+			return false;
+
+		ArrayList<WalletTypes> arrayList = GetWalletTypes();
+		if(arrayList == null)
+			return false;
+
+		int nIndex = GetIndexById(walletTypes);
+		if(nIndex == -1)
+			return false;
+
+		if(sqLiteDatabaseManager.ModifyAWalletType(walletTypes) == false)
+			return false;
+
+		arrayList.get(nIndex).Instead(walletTypes);
+		return true;
+	}
+
+	public static boolean ModifyName(int nIndex, String strNewName, SQLiteDatabaseManager sqLiteDatabaseManager)
+	{
+		if(strNewName == null || strNewName.length() == 0 || sqLiteDatabaseManager == null)
 			return false;
 
 		ArrayList<WalletTypes> arrayList = GetWalletTypes();
@@ -28,12 +48,13 @@ public class WalletTypeManager
 
 		WalletTypes walletType = arrayList.get(nIndex);
 
-		WalletTypes walletTypes = new WalletTypes();
-		walletTypes.strName = strNewName;
-		walletTypes.strLayoutName = walletType.strLayoutName;
-		walletTypes.strColor = walletType.strColor;
-		walletTypes.nWalletTypeID = walletType.nWalletTypeID;
-		if(sqLiteDatabaseManager.ModifyAWalletType(walletTypes) == false)
+		WalletTypes modifyWalletTypes = new WalletTypes();
+		modifyWalletTypes.strName = strNewName;
+		modifyWalletTypes.nWalletTypeID = walletType.nWalletTypeID;
+		if(IsExitType(modifyWalletTypes))
+			return false;
+
+		if(sqLiteDatabaseManager.ModifyAWalletType(modifyWalletTypes) == false)
 			return false;
 
 		walletType.strName = strNewName;
@@ -41,34 +62,27 @@ public class WalletTypeManager
 		return true;
 	}
 
-	public static boolean ChangeBackgroundColor(int nIndex, String strNewColor, SQLiteDatabaseManager sqLiteDatabaseManager)
+	public static boolean DeleteSpecifiedType(WalletTypes walletTypes, SQLiteDatabaseManager sqLiteDatabaseManager)
 	{
-		if(strNewColor == null || strNewColor.length() == 0)
-			return false;
-
 		ArrayList<WalletTypes> arrayList = GetWalletTypes();
-		if(arrayList == null || nIndex >= arrayList.size())
+		if(arrayList == null || sqLiteDatabaseManager == null)
 			return false;
 
-		WalletTypes walletType = arrayList.get(nIndex);
-
-		WalletTypes walletTypes = new WalletTypes();
-		walletTypes.strName = walletType.strName;
-		walletTypes.strLayoutName = walletType.strLayoutName;
-		walletTypes.strColor = strNewColor;
-		walletTypes.nWalletTypeID = walletType.nWalletTypeID;
-		if(sqLiteDatabaseManager.ModifyAWalletType(walletTypes) == false)
+		int nIndex = GetIndexById(walletTypes);
+		if(nIndex == -1)
 			return false;
 
-		walletType.strColor = strNewColor;
+		if(sqLiteDatabaseManager.DeleteAWalletType(walletTypes) == false)
+			return false;
 
-		return true;
+		arrayList.remove(nIndex);
+		return false;
 	}
 
 	public static boolean DeleteSpecifiedType(int nIndex, SQLiteDatabaseManager sqLiteDatabaseManager)
 	{
 		ArrayList<WalletTypes> arrayList = GetWalletTypes();
-		if(arrayList == null || nIndex >= arrayList.size())
+		if(arrayList == null || sqLiteDatabaseManager == null || nIndex >= arrayList.size())
 			return false;
 
 		if(sqLiteDatabaseManager.DeleteAWalletType(arrayList.get(nIndex)) == false)
@@ -80,13 +94,36 @@ public class WalletTypeManager
 
 	public static boolean AddNewType(WalletTypes eNewWalletTypes, SQLiteDatabaseManager sqLiteDatabaseManager)
 	{
-		if(GetIndexByNameAndType(eNewWalletTypes.strName, eNewWalletTypes.strLayoutName) != -1)
+		ArrayList<WalletTypes> arrayList = GetWalletTypes();
+		if(arrayList == null || sqLiteDatabaseManager == null)
 			return false;
 
-		return sqLiteDatabaseManager.AddAWalletType(eNewWalletTypes);
+		if(IsExitType(eNewWalletTypes))
+			return false;
+
+		if(sqLiteDatabaseManager.AddAWalletType(eNewWalletTypes) == false)
+			return false;
+
+		arrayList.add(eNewWalletTypes);
+		return true;
 	}
 
-	public static int GetIndexByNameAndType(String strName, String strType)
+	public static int GetIndexById(WalletTypes walletTypes)
+	{
+		ArrayList<WalletTypes> arrayList = GetWalletTypes();
+		if(arrayList == null || walletTypes == null)
+			return -1;
+
+		for(int i = 0; i < arrayList.size(); ++i)
+		{
+			if(walletTypes.nWalletTypeID == arrayList.get(i).nWalletTypeID)
+				return i;
+		}
+
+		return -1;
+	}
+
+	public static int GetIndexByName(String strName)
 	{
 		ArrayList<WalletTypes> arrayList = GetWalletTypes();
 		if(arrayList == null)
@@ -95,7 +132,7 @@ public class WalletTypeManager
 		int nIndex = -1;
 		for(int i = 0; i < arrayList.size(); ++i)
 		{
-			if(strName == arrayList.get(i).strName && strType == arrayList.get(i).strLayoutName)
+			if(strName == arrayList.get(i).strName)
 			{
 				nIndex = i;
 				break;
@@ -103,5 +140,20 @@ public class WalletTypeManager
 		}
 
 		return nIndex;
+	}
+
+	public static boolean IsExitType(WalletTypes eWalletType)
+	{
+		ArrayList<WalletTypes> arrayList = GetWalletTypes();
+		if(arrayList == null || eWalletType == null)
+			return false;
+
+		for(int i = 0; i < arrayList.size(); ++i)
+		{
+			if(eWalletType.nWalletTypeID == arrayList.get(i).nWalletTypeID)
+				return true;
+		}
+
+		return false;
 	}
 }
