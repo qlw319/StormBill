@@ -3,16 +3,16 @@ package com.stormbill.stormbill.adapter;
 import android.content.Context;
 
 import com.stormbill.stormbill.R;
-import com.stormbill.stormbill.bean.AccountType;
+import com.stormbill.stormbill.common_type.WalletTypes;
 
 import java.util.List;
 
-public class AccountGroupAdapter extends CommonAdapter<AccountType>
+public class AccountGroupAdapter extends CommonAdapter<WalletTypes>
 {
 	private Context mContext;
-	private List<AccountType> mList;
+	private List<WalletTypes> mList;
 
-	public AccountGroupAdapter(Context context, int layoutId, List<AccountType> datas)
+	public AccountGroupAdapter(Context context, int layoutId, List<WalletTypes> datas)
 	{
 		super(context, layoutId, datas);
 
@@ -21,10 +21,8 @@ public class AccountGroupAdapter extends CommonAdapter<AccountType>
 	}
 
 	@Override
-	public void convertView(ViewHolder viewHolder, AccountType accountType)
+	public void convertView(ViewHolder viewHolder, WalletTypes walletTypes)
 	{
-		viewHolder.setImage(R.id.image, accountType.getImg())
-				.setText(R.id.up_text, accountType.getUpText())
-				.setText(R.id.down_text, accountType.getDownText());
+		viewHolder.setText(R.id.groupItem, walletTypes.strName);
 	}
 }
