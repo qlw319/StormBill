@@ -39,6 +39,11 @@ public class ViewHolder
 		return holder;
 	}
 
+	public void setPosition(int position)
+	{
+		this.mPosition = position;
+	}
+
 	public int getPosition()
 	{
 		return this.mPosition;
