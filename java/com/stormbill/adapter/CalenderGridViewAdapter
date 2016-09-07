@@ -4,29 +4,58 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.DisplayMetrics;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.GridLayoutAnimationController;
+import android.widget.LinearLayout;
 
 import java.util.List;
 import com.stormbill.stormbill.R;
+import com.stormbill.stormbill.common_type.CalenderDate;
+import com.stormbill.stormbill.common_type.IncomeAndPay;
+import com.stormbill.stormbill.data_manager.DateInforManager;
 
-public class CalenderGridViewAdapter extends CommonAdapter<Integer>
+public class CalenderGridViewAdapter extends CommonAdapter<CalenderDate>
 {
 	private Context mContext;
-	public CalenderGridViewAdapter(Context context, int layoutId, List<Integer> datas)
+	public CalenderGridViewAdapter(Context context, int layoutId, List<CalenderDate> datas)
 	{
 		super(context, layoutId, datas);
 		mContext = context;
 	}
 
 	@Override
-	public void convertView(ViewHolder viewHolder, Integer i)
+	public void convertView(ViewHolder viewHolder, CalenderDate calenderDate)
 	{
 		DisplayMetrics metrics = new DisplayMetrics();
 		((Activity)mContext).getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-		viewHolder.setText(R.id.id_day, Integer.toString(i));
-		viewHolder.setTextWidth(R.id.id_day, metrics.widthPixels / 7);
-		viewHolder.setTextHeigh(R.id.id_day, metrics.widthPixels / 7);
-		viewHolder.setTextColor(R.id.id_day, Color.GRAY);
-		viewHolder.setTextBackgroundResource(R.id.id_day, R.drawable.rectangle_calender_write);
+		LinearLayout linearLayout = viewHolder.getView(R.id.id_layout_calender);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(metrics.widthPixels / 7, metrics.widthPixels / 7);
+		linearLayout.setLayoutParams(params);
+
+		if(calenderDate.getDay() == 0)
+		{
+			viewHolder.setText(R.id.id_day, "");
+			viewHolder.setText(R.id.id_day_pay, "");
+			viewHolder.setText(R.id.id_day_income, "");
+		}
+		else
+		{
+			viewHolder.setText(R.id.id_day, Integer.toString(calenderDate.getDay()));
+			IncomeAndPay incomeAndPay = DateInforManager.GetSpecifyDayIncomeAndPay(calenderDate.getnYear(), calenderDate.getMonth(), calenderDate.getDay());
+			if(incomeAndPay == null)
+			{
+				viewHolder.getView(R.id.id_day_pay).setVisibility(View.GONE);
+				viewHolder.getView(R.id.id_day_income).setVisibility(View.GONE);
+			}
+			else
+			{
+				viewHolder.setText(R.id.id_day_pay, String.valueOf(incomeAndPay.dPay))
+						.setTextColor(R.id.id_day_pay, Color.RED)
+						.setText(R.id.id_day_income, String.valueOf(incomeAndPay.dIncome))
+						.setTextColor(R.id.id_day_income, Color.GREEN);
+			}
+		}
 	}
 }
