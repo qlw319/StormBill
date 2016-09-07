@@ -1,16 +1,10 @@
 package com.stormbill.stormbill.adapter;
 
 import android.content.Context;
-import android.icu.text.DecimalFormat;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.stormbill.stormbill.R;
 import com.stormbill.stormbill.common_type.RecordItemDetails;
-import com.stormbill.stormbill.data_manager.RecordItemDetailManager;
 import com.stormbill.stormbill.initialization_information.CommonInitInfor;
 
 import java.util.Calendar;
@@ -25,6 +19,7 @@ public class MingXiAdapter extends CommonAdapter<RecordItemDetails>
 	private static final int TYPE_YEAR_MONTH = 0;
 	private static final int TYPE_DAY = 1;
 	private static final int TYPE_PAY_INCOME = 2;
+	private static boolean m_bFirstDateShow = true;
 
 	public MingXiAdapter(Context context, int layoutId, List<RecordItemDetails> datas)
 	{
@@ -34,14 +29,15 @@ public class MingXiAdapter extends CommonAdapter<RecordItemDetails>
 	@Override
 	public void convertView(ViewHolder holder, RecordItemDetails recordItemDetails)
 	{
+		m_bFirstDateShow = holder.getPosition() == 0;
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
 		int curType = 0;
 		if(recordItemDetails.nYear != 0 && recordItemDetails.nMonth != 0 && recordItemDetails.nDay == 0)
-			curType =  TYPE_YEAR_MONTH;
+			curType = TYPE_YEAR_MONTH;
 		else if(recordItemDetails.nYear == 0 && recordItemDetails.nMonth == 0 && recordItemDetails.nDay != 0)
-			curType =  TYPE_DAY;
+			curType = TYPE_DAY;
 		else
-			curType =  TYPE_PAY_INCOME;
+			curType = TYPE_PAY_INCOME;
 
 		switch(curType)
 		{
@@ -98,10 +94,13 @@ public class MingXiAdapter extends CommonAdapter<RecordItemDetails>
 
 				if(recordItemDetails.nDay != 0)
 					holder.setText(R.id.id_tv_day, String.valueOf(recordItemDetails.nDay) + "日");
-				if(calendar.get(Calendar.DATE) == recordItemDetails.nDay)
-					holder.setText(R.id.id_tv_day, "今日");
-				if(calendar.get(Calendar.DATE) == recordItemDetails.nDay + 1)
-					holder.setText(R.id.id_tv_day, "昨日");
+				if(m_bFirstDateShow)
+				{
+					if(calendar.get(Calendar.DAY_OF_MONTH) == recordItemDetails.nDay)
+						holder.setText(R.id.id_tv_day, "今日");
+					else if(calendar.get(Calendar.DAY_OF_MONTH) == recordItemDetails.nDay + 1)
+						holder.setText(R.id.id_tv_day, "昨日");
+				}
 			}
 			break;
 			case TYPE_PAY_INCOME:
@@ -127,10 +126,7 @@ public class MingXiAdapter extends CommonAdapter<RecordItemDetails>
 				}
 				else if(recordItemDetails.dIncomeMoney > 0)
 				{
-					holder.setText(R.id.id_income_type, InitIncomeTypesName[recordItemDetails.nBillTypeId])
-							.setText(R.id.id_tv_income_remark, recordItemDetails.strRemark)
-							.setText(R.id.id_tv_income_money, String.format("%.2f", recordItemDetails.dIncomeMoney))
-							.setImage(R.id.id_imageView_type, CommonInitInfor.InitIncomeTypesPicture[recordItemDetails.nBillTypeId]);
+					holder.setText(R.id.id_income_type, InitIncomeTypesName[recordItemDetails.nBillTypeId]).setText(R.id.id_tv_income_remark, recordItemDetails.strRemark).setText(R.id.id_tv_income_money, String.format("%.2f", recordItemDetails.dIncomeMoney)).setImage(R.id.id_imageView_type, CommonInitInfor.InitIncomeTypesPicture[recordItemDetails.nBillTypeId]);
 
 					holder.getView(R.id.id_pay_type).setVisibility(View.GONE);
 					holder.getView(R.id.id_tv_pay_remark).setVisibility(View.GONE);
@@ -143,5 +139,6 @@ public class MingXiAdapter extends CommonAdapter<RecordItemDetails>
 			}
 			break;
 		}
+		m_bFirstDateShow = false;
 	}
 }
