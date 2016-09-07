@@ -19,6 +19,7 @@ import com.stormbill.stormbill.datastructs.ControlCenter;
 import com.stormbill.stormbill.fg.FragmentAccount;
 import com.stormbill.stormbill.fg.FragmentJiYiBi;
 import com.stormbill.stormbill.fg.FragmentMingXi;
+import com.stormbill.stormbill.fg.FragmentRili;
 
 public class MainActivity extends FragmentActivity implements View.OnTouchListener, FragmentCallBack
 {
@@ -44,6 +45,7 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 	private Fragment mFragmentMingXiPage;
 	private Fragment mFragmentJiYiBiPage;
 	private Fragment mFragmentAccountPage;
+	private Fragment mFragmentRiliPage;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -234,6 +236,22 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 				mTabBar.setVisibility(View.GONE);
 			}
 			break;
+			case 3:
+			{
+				if(mFragmentRiliPage == null)
+				{
+					mFragmentRiliPage = new FragmentRili();
+					fragmentTransaction.add(R.id.id_content, mFragmentRiliPage);
+				}
+				else
+					fragmentTransaction.show(mFragmentRiliPage);
+
+				mImgView4.setBackgroundResource(R.mipmap.rili_2);
+				mText4.setTextColor(getResources().getColor(R.color.bar_text));
+
+				mTabBar.setVisibility(View.GONE);
+			}
+			break;
 			default:
 				break;
 		}
@@ -257,6 +275,11 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 		if(mFragmentJiYiBiPage != null)
 		{
 			fragmentTransaction.hide(mFragmentJiYiBiPage);
+		}
+
+		if(mFragmentRiliPage != null)
+		{
+			fragmentTransaction.hide(mFragmentRiliPage);
 		}
 	}
 
