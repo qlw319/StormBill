@@ -1,0 +1,44 @@
+package com.stormbill.stormbill.adapter;
+
+import android.content.Context;
+import android.graphics.Color;
+
+import com.stormbill.stormbill.R;
+import com.stormbill.stormbill.common_type.RecordItemDetails;
+import com.stormbill.stormbill.initialization_information.CommonInitInfor;
+
+import java.util.List;
+
+import static com.stormbill.stormbill.initialization_information.CommonInitInfor.InitPayTypesName;
+
+/**
+ * Created by Administrator on 2016/9/7 0007.
+ */
+public class CalenderListViewAdapter extends CommonAdapter<RecordItemDetails>
+{
+	private Context mContext;
+	public CalenderListViewAdapter(Context context, int layoutId, List<RecordItemDetails> datas)
+	{
+		super(context, layoutId, datas);
+		mContext = context;
+	}
+
+	@Override
+	public void convertView(ViewHolder viewHolder, RecordItemDetails recordItemDetails)
+	{
+		viewHolder.setImage(R.id.id_calender_imageView_type, CommonInitInfor.InitPayTypesPicture[recordItemDetails.nBillTypeId])
+		.setText(R.id.id_calender_type, InitPayTypesName[recordItemDetails.nBillTypeId]);
+
+		if(recordItemDetails.dPayMoney > 0)
+		{
+			viewHolder.setText(R.id.id_calender_money, "-" + String.valueOf(recordItemDetails.dPayMoney))
+			.setTextColor(R.id.id_calender_money, Color.RED);
+		}
+		else
+		{
+			viewHolder.setText(R.id.id_calender_money, "+" + String.valueOf(recordItemDetails.dIncomeMoney))
+					.setTextColor(R.id.id_calender_money, Color.GREEN);
+		}
+
+	}
+}
