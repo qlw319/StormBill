@@ -17,6 +17,7 @@ import static com.stormbill.stormbill.initialization_information.CommonInitInfor
 public class CalenderListViewAdapter extends CommonAdapter<RecordItemDetails>
 {
 	private Context mContext;
+
 	public CalenderListViewAdapter(Context context, int layoutId, List<RecordItemDetails> datas)
 	{
 		super(context, layoutId, datas);
@@ -26,18 +27,16 @@ public class CalenderListViewAdapter extends CommonAdapter<RecordItemDetails>
 	@Override
 	public void convertView(ViewHolder viewHolder, RecordItemDetails recordItemDetails)
 	{
-		viewHolder.setImage(R.id.id_calender_imageView_type, CommonInitInfor.InitPayTypesPicture[recordItemDetails.nBillTypeId])
-		.setText(R.id.id_calender_type, InitPayTypesName[recordItemDetails.nBillTypeId]);
+		viewHolder.setImage(R.id.id_calender_imageView_type, CommonInitInfor.InitPayTypesPicture[recordItemDetails.nBillTypeId]).setText(R.id.id_calender_type, InitPayTypesName[recordItemDetails.nBillTypeId]);
 
 		if(recordItemDetails.dPayMoney > 0)
 		{
-			viewHolder.setText(R.id.id_calender_money, "-" + String.valueOf(recordItemDetails.dPayMoney))
-			.setTextColor(R.id.id_calender_money, Color.RED);
+			viewHolder.setText(R.id.id_calender_money, "-" + String.valueOf(recordItemDetails.dPayMoney)).setTextColor(R.id.id_calender_money, Color.RED);
 		}
-		else
+
+		if(recordItemDetails.dIncomeMoney > 0)
 		{
-			viewHolder.setText(R.id.id_calender_money, "+" + String.valueOf(recordItemDetails.dIncomeMoney))
-					.setTextColor(R.id.id_calender_money, Color.GREEN);
+			viewHolder.setText(R.id.id_calender_money, "+" + String.valueOf(recordItemDetails.dIncomeMoney)).setTextColor(R.id.id_calender_money, Color.GREEN);
 		}
 
 	}
