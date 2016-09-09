@@ -111,10 +111,7 @@ public class MingXiAdapter extends CommonAdapter<RecordItemDetails>
 
 				if(recordItemDetails.dPayMoney > 0)
 				{
-					holder.setText(R.id.id_pay_type, InitPayTypesName[recordItemDetails.nBillTypeId])
-							.setText(R.id.id_tv_pay_remark, recordItemDetails.strRemark)
-							.setText(R.id.id_tv_pay_money, String.format("%.2f", recordItemDetails.dPayMoney))
-							.setImage(R.id.id_imageView_type, CommonInitInfor.InitPayTypesPicture[recordItemDetails.nBillTypeId]);
+					holder.setText(R.id.id_pay_type, InitPayTypesName[recordItemDetails.nBillTypeId]).setText(R.id.id_tv_pay_remark, recordItemDetails.strRemark).setText(R.id.id_tv_pay_money, String.format("%.2f", recordItemDetails.dPayMoney)).setImage(R.id.id_imageView_type, CommonInitInfor.InitPayTypesPicture[recordItemDetails.nBillTypeId]);
 
 					holder.getView(R.id.id_income_type).setVisibility(View.GONE);
 					holder.getView(R.id.id_tv_income_remark).setVisibility(View.GONE);
