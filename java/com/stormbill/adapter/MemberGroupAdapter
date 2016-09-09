@@ -1,7 +1,6 @@
 package com.stormbill.stormbill.adapter;
 
 import android.content.Context;
-import android.graphics.Color;
 
 import com.stormbill.stormbill.R;
 
