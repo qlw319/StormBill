@@ -44,8 +44,8 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 
 	private Fragment mFragmentMingXiPage;
 	private Fragment mFragmentJiYiBiPage;
-	private Fragment mFragmentAccountPage;
-	private Fragment mFragmentRiliPage;
+	private Fragment mFragmentTuBiaoPage;
+	private Fragment mFragmentRiLiPage;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -211,13 +211,13 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 
 			case 1:
 			{
-				if(mFragmentAccountPage == null)
+				if(mFragmentTuBiaoPage == null)
 				{
-					mFragmentAccountPage = new FragmentAccount();
-					fragmentTransaction.add(R.id.id_content, mFragmentAccountPage);
+					mFragmentTuBiaoPage = new FragmentAccount();
+					fragmentTransaction.add(R.id.id_content, mFragmentTuBiaoPage);
 				}
 				else
-					fragmentTransaction.show(mFragmentAccountPage);
+					fragmentTransaction.show(mFragmentTuBiaoPage);
 
 				mImgView2.setBackgroundResource(R.mipmap.tubiao_2);
 				mText2.setTextColor(getResources().getColor(R.color.bar_text));
@@ -238,13 +238,13 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 			break;
 			case 3:
 			{
-				if(mFragmentRiliPage == null)
+				if(mFragmentRiLiPage == null)
 				{
-					mFragmentRiliPage = new FragmentRili();
-					fragmentTransaction.add(R.id.id_content, mFragmentRiliPage);
+					mFragmentRiLiPage = new FragmentRili();
+					fragmentTransaction.add(R.id.id_content, mFragmentRiLiPage);
 				}
 				else
-					fragmentTransaction.show(mFragmentRiliPage);
+					fragmentTransaction.show(mFragmentRiLiPage);
 
 				mImgView4.setBackgroundResource(R.mipmap.rili_2);
 				mText4.setTextColor(getResources().getColor(R.color.bar_text));
@@ -267,9 +267,9 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 			fragmentTransaction.hide(mFragmentMingXiPage);
 		}
 
-		if(mFragmentAccountPage != null)
+		if(mFragmentTuBiaoPage != null)
 		{
-			fragmentTransaction.hide(mFragmentAccountPage);
+			fragmentTransaction.hide(mFragmentTuBiaoPage);
 		}
 
 		if(mFragmentJiYiBiPage != null)
@@ -277,9 +277,9 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 			fragmentTransaction.hide(mFragmentJiYiBiPage);
 		}
 
-		if(mFragmentRiliPage != null)
+		if(mFragmentRiLiPage != null)
 		{
-			fragmentTransaction.hide(mFragmentRiliPage);
+			fragmentTransaction.hide(mFragmentRiLiPage);
 		}
 	}
 
@@ -322,7 +322,9 @@ public class MainActivity extends FragmentActivity implements View.OnTouchListen
 	@Override
 	public void onBackPressed()
 	{
-		if(mFragmentJiYiBiPage != null && mFragmentJiYiBiPage.isVisible())
+		if(mFragmentJiYiBiPage != null && mFragmentJiYiBiPage.isVisible() ||
+				mFragmentRiLiPage != null && mFragmentRiLiPage.isVisible() ||
+				mFragmentTuBiaoPage != null && mFragmentTuBiaoPage.isVisible())
 		{
 			resetImg();
 			setSelect(0);
