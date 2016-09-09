@@ -1,0 +1,262 @@
+package com.stormbill.stormbill.fg;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.stormbill.stormbill.R;
+import com.stormbill.stormbill.activity.MainActivity;
+import com.stormbill.stormbill.adapter.CalenderGridViewAdapter;
+import com.stormbill.stormbill.adapter.CalenderListViewAdapter;
+import com.stormbill.stormbill.callback.FragmentCallBack;
+import com.stormbill.stormbill.common.BillCalender;
+import com.stormbill.stormbill.common_type.CalenderDate;
+import com.stormbill.stormbill.common_type.RecordItemDetails;
+import com.stormbill.stormbill.data_manager.RecordItemDetailManager;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.TimeZone;
+
+public class FragmentRili extends Fragment implements View.OnClickListener, AdapterView.OnItemClickListener
+{
+	private FragmentCallBack fragmentCallBack = null;
+	private LayoutInflater mInflater;
+	private View mRootView;
+	private ImageButton mBtnLeft;
+	private ImageButton mBtnRight;
+	private GridView mGridView;
+	private CalenderGridViewAdapter mCalenderGridViewAdapter;
+	private BillCalender mBillCalender;
+
+	private TextView mDate;
+	private int mSelectYear;
+	private int mSelectMonth;
+
+	private ArrayList<CalenderDate> mDatas;
+	private CalenderListViewAdapter mCalenderListViewAdapter;
+	private ListView mListView;
+	private LinearLayout mHeaderView;
+
+	private ArrayList<RecordItemDetails> mRecordItemDetailsesList;
+
+	private boolean mInitilization = false;
+	private View mClickView;
+	private CalenderDate mLastRecordDate;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+	{
+		mInflater = inflater;
+		return inflater.inflate(R.layout.fg_calender, container, false);
+	}
+
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState)
+	{
+		super.onViewCreated(view, savedInstanceState);
+		mRootView = view;
+		initViews(view);
+		initDatas();
+		initEvents();
+	}
+
+	@Override
+	public void onHiddenChanged(boolean hidden)
+	{
+		if(!mInitilization)
+			return;
+
+		if(!hidden)
+		{
+			Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+			mSelectYear = calendar.get(Calendar.YEAR);
+			mSelectMonth = calendar.get(Calendar.MONTH) + 1;
+			fillCalender();
+		}
+	}
+
+	@Override
+	public void onAttach(Context context)
+	{
+		super.onAttach(context);
+		fragmentCallBack = (MainActivity)context;
+	}
+
+	private void initViews(View view)
+	{
+		mBtnLeft = (ImageButton)view.findViewById(R.id.id_day_left);
+		mBtnRight = (ImageButton)view.findViewById(R.id.id_day_right);
+		mDate = (TextView)view.findViewById(R.id.id_tv_day_time);
+
+		mGridView = (GridView)view.findViewById(R.id.id_gridview_calender);
+		mBillCalender = new BillCalender();
+
+		mListView = (ListView)view.findViewById(R.id.id_calender_listview);
+		mHeaderView = (LinearLayout)view.findViewById(R.id.id_calender_list_header);
+	}
+
+	private void initDatas()
+	{
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+		mSelectYear = calendar.get(Calendar.YEAR);
+		mSelectMonth = calendar.get(Calendar.MONTH) + 1;
+		mLastRecordDate = new CalenderDate();
+		mLastRecordDate.setYear(mSelectYear);
+		mLastRecordDate.setMonth(mSelectMonth);
+		mLastRecordDate.setDay(calendar.get(Calendar.DAY_OF_MONTH));
+
+		TextView tv = (TextView)mRootView.findViewById(R.id.id_calender_textview_time);
+		tv.setText(mSelectYear + "年" + mSelectMonth + "月" + calendar.get(Calendar.DAY_OF_MONTH) + "日");
+		mRecordItemDetailsesList = RecordItemDetailManager.GetSpecifiedDayList(mSelectYear, mSelectMonth, calendar.get(Calendar.DAY_OF_MONTH));
+		mCalenderListViewAdapter = new CalenderListViewAdapter(mInflater.getContext(), R.layout.layout_calender_listview_item, mRecordItemDetailsesList);
+		fillCalender();
+	}
+
+	private void initEvents()
+	{
+		mBtnLeft.setOnClickListener(this);
+		mBtnRight.setOnClickListener(this);
+		mListView.setAdapter(mCalenderListViewAdapter);
+		mGridView.setOnItemClickListener(this);
+	}
+
+	public void fillCalender()
+	{
+		mDatas = mBillCalender.getCalender(mSelectYear, mSelectMonth);
+
+		if(mCalenderGridViewAdapter == null)
+		{
+			mCalenderGridViewAdapter = new CalenderGridViewAdapter(mInflater.getContext(), R.layout.layout_gridview_item, mDatas);
+			mGridView.setAdapter(mCalenderGridViewAdapter);
+		}
+		else
+		{
+			mCalenderGridViewAdapter.setDatas(mDatas);
+			mCalenderGridViewAdapter.notifyDataSetChanged();
+		}
+	}
+
+	@Override
+	public void onClick(View view)
+	{
+		switch(view.getId())
+		{
+			case R.id.id_day_left:
+			{
+				if(mSelectMonth == 1)
+				{
+					mSelectMonth = 12;
+					mSelectYear -= 1;
+				}
+				else
+					mSelectMonth -= 1;
+				mClickView = null;
+
+				fillCalender();
+				mDate.setText(String.valueOf(mSelectYear) + "年" + String.valueOf(mSelectMonth) + "月");
+			}
+			break;
+			case R.id.id_day_right:
+			{
+				if(mSelectMonth == 12)
+				{
+					mSelectMonth = 1;
+					mSelectYear += 1;
+				}
+				else
+					mSelectMonth += 1;
+				mClickView = null;
+
+				fillCalender();
+				mDate.setText(String.valueOf(mSelectYear) + "年" + String.valueOf(mSelectMonth) + "月");
+			}
+			break;
+			default:
+				break;
+		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
+	{
+		TextView tv = (TextView)view.findViewById(R.id.id_day);
+		if(tv.getText().toString() == "")
+			return;
+
+		if(mClickView == null)
+		{
+			if(mSelectYear == Calendar.getInstance().get(Calendar.YEAR) && mSelectMonth == Calendar.getInstance().get(Calendar.MONTH) + 1)
+			{
+				for(int n = 0; n < adapterView.getCount(); ++n)
+				{
+					View v = adapterView.getChildAt(n);
+					if(v == null)
+						break;
+					TextView textView = (TextView)v.findViewById(R.id.id_day);
+					if(textView.getText() == null || textView.getText().toString() == "")
+						continue;
+					int day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+					if(Integer.valueOf(textView.getText().toString()) == day)
+						continue;
+
+					mClickView = adapterView.getChildAt(n);
+				}
+			}
+			else
+			{
+				for(int n = 0; n < adapterView.getCount(); ++n)
+				{
+					View v = adapterView.getChildAt(n);
+					if(v == null)
+						break;
+					TextView textView = (TextView)v.findViewById(R.id.id_day);
+					if(textView.getText() == null || textView.getText().toString() == "")
+						continue;
+
+					if(textView.getText().toString() == "1")
+						mClickView = adapterView.getChildAt(n);
+				}
+			}
+		}
+
+		int nDay = Integer.valueOf(tv.getText().toString());
+
+		tv = (TextView)view.findViewById(R.id.id_day);
+		tv.setTextColor(Color.BLUE);
+		LinearLayout layout = (LinearLayout)view.findViewById(R.id.id_layout_calender);
+		layout.setBackgroundResource(R.drawable.rectangle_calender_blue);
+		if(mClickView != null)
+		{
+			tv = (TextView)mClickView.findViewById(R.id.id_day);
+			tv.setTextColor(Color.BLACK);
+			layout = (LinearLayout)mClickView.findViewById(R.id.id_layout_calender);
+			if(mLastRecordDate.getnYear() == Calendar.getInstance().get(Calendar.YEAR) && mLastRecordDate.getMonth() == Calendar.getInstance().get(Calendar.MONTH) + 1 && mLastRecordDate.getDay() == Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
+				layout.setBackgroundResource(R.drawable.rectangle_calender_black);
+			else
+				layout.setBackgroundResource(R.drawable.rectangle_calender_write);
+		}
+
+		mRecordItemDetailsesList = RecordItemDetailManager.GetSpecifiedDayList(mSelectYear, mSelectMonth, nDay);
+
+		mCalenderListViewAdapter.setDatas(mRecordItemDetailsesList);
+		mCalenderListViewAdapter.notifyDataSetChanged();
+
+		tv = (TextView)mHeaderView.findViewById(R.id.id_calender_textview_time);
+		tv.setText(mSelectYear + "年" + mSelectMonth + "月" + nDay + "日");
+		mClickView = view;
+		mLastRecordDate.setYear(mSelectYear);
+		mLastRecordDate.setMonth(mSelectMonth);
+		mLastRecordDate.setDay(nDay);
+	}
+}
