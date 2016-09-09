@@ -1,12 +1,16 @@
 package com.stormbill.stormbill.data_manager;
 
+import com.stormbill.stormbill.common.Common;
+import com.stormbill.stormbill.common_type.GraphRatioType;
 import com.stormbill.stormbill.common_type.IncomeAndPay;
 import com.stormbill.stormbill.common_type.RecordItemDetails;
 import com.stormbill.stormbill.database_manager.SQLiteDatabaseManager;
 import com.stormbill.stormbill.datastructs.ControlCenter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import static com.stormbill.stormbill.data_manager.DateInforManager.GetSpecifyDayIncomeAndPay;
 
@@ -108,11 +112,11 @@ public class RecordItemDetailManager
 	// 获取每一天记录列表
 	public static ArrayList<RecordItemDetails> GetSpecifiedDayList(int nYear, int nMonth, int nDay)
 	{
+		ArrayList<RecordItemDetails> arrDayList = new ArrayList<>();
 		ArrayList<RecordItemDetails> arrAllRecordList = ControlCenter.GetRecordItemDetails();
 		if(arrAllRecordList == null)
-			return null;
+			return arrDayList;
 
-		ArrayList<RecordItemDetails> arrDayList = new ArrayList<>();
 		for(int i = 0; i < arrAllRecordList.size(); ++i)
 		{
 			RecordItemDetails tmp = arrAllRecordList.get(i);
@@ -139,6 +143,8 @@ public class RecordItemDetailManager
 		int nLastRecordYear = 0;
 		int nLastRecordMonth = 0;
 		int nLastRecordDay = 0;
+		Date date = null;
+
 		Calendar calendar = Calendar.getInstance();
 		for(int i = 0; i < arrAllRecordList.size(); ++i)
 		{
@@ -185,12 +191,95 @@ public class RecordItemDetailManager
 			item.Instead(tmp);
 			arrTimeLineRecordList.add(item);
 
+			try
+			{
+				SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+				if(date == null)
+				{
+					date = sim.parse(tmp.strTimestamp);
+				}
+				else
+				{
+					Date dTemp = sim.parse(tmp.strTimestamp);
+					if(date.before(dTemp))
+					{
+						date = dTemp;
+						Common.nPosition = arrTimeLineRecordList.size() - 1;
+					}
+				}
+			}
+			catch(java.text.ParseException e)
+			{
+				e.printStackTrace();
+			}
+
 			nLastRecordYear = tmp.nYear;
 			nLastRecordMonth = tmp.nMonth;
 			nLastRecordDay = tmp.nDay;
 		}
 
 		return arrTimeLineRecordList;
+	}
+
+	public static ArrayList<RecordItemDetails> GetRecordItemYearList(int year)
+	{
+		ArrayList<RecordItemDetails> arrayList = new ArrayList<>();
+		ArrayList<RecordItemDetails> recordItemList = ControlCenter.GetRecordItemDetails();
+		if(recordItemList == null)
+			return arrayList;
+
+		for(int i = 0; i < recordItemList.size(); ++i)
+		{
+			if(recordItemList.get(i).nYear != year)
+				continue;
+
+			RecordItemDetails item = new RecordItemDetails();
+			item.Instead(recordItemList.get(i));
+			arrayList.add(i);
+		}
+
+		return arrayList;
+	}
+
+	public static ArrayList<GraphRatioType> GetGraphRatioYearList(int year)
+	{
+		ArrayList<GraphRatioType> arrayList = new ArrayList<>();
+		ArrayList<RecordItemDetails> recordItemList = ControlCenter.GetRecordItemDetails();
+		if(recordItemList == null)
+			return arrayList;
+
+		for(int i = 0; i < recordItemList.size(); ++i)
+		{
+			RecordItemDetails item = recordItemList.get(i);
+			if(item.nYear != year)
+				continue;
+
+			GraphRatioType ratioType = new GraphRatioType();
+			ratioType.nBillTypeId = item.nBillTypeId;
+			if(item.dIncomeMoney > 0)
+			{
+				ratioType.dTotalMoney = item.dIncomeMoney;
+				ratioType.bIncome = true;
+			}
+			else
+				ratioType.dTotalMoney = item.dPayMoney;
+		}
+
+		return arrayList;
+	}
+
+	public static ArrayList<GraphRatioType> GetGraphRatioMonthList(int year, int month)
+	{
+		ArrayList<GraphRatioType> arrayList = new ArrayList<>();
+
+		return arrayList;
+	}
+
+	public static ArrayList<GraphRatioType> GetGraphRatioDayList(int year, int month, int day)
+	{
+		ArrayList<GraphRatioType> arrayList = new ArrayList<>();
+
+		return arrayList;
 	}
 
 	// 对从数据库中加载的数据进行一次整理，内部采用的是快速排序
