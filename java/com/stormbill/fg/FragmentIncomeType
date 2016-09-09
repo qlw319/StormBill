@@ -2,7 +2,6 @@ package com.stormbill.stormbill.fg;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,11 +12,8 @@ import android.widget.TextView;
 
 import com.stormbill.stormbill.R;
 import com.stormbill.stormbill.adapter.GridViewAdapter;
-import com.stormbill.stormbill.bean.GridEntity;
 import com.stormbill.stormbill.common.Common;
 import com.stormbill.stormbill.datastructs.ControlCenter;
-
-import java.util.ArrayList;
 
 public class FragmentIncomeType extends Fragment
 {
