@@ -1,42 +1,41 @@
 package com.stormbill.stormbill.fg;
 
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
-
-import com.stormbill.stormbill.bean.Bean;
-import com.stormbill.stormbill.adapter.MingXiAdapter;
 import com.stormbill.stormbill.R;
+import com.stormbill.stormbill.adapter.MingXiAdapter;
 import com.stormbill.stormbill.common.Common;
 import com.stormbill.stormbill.common_type.IncomeAndPay;
+import com.stormbill.stormbill.common_type.RecordItemDetails;
 import com.stormbill.stormbill.data_manager.DateInforManager;
+import com.stormbill.stormbill.data_manager.RecordItemDetailManager;
 import com.stormbill.stormbill.datastructs.ControlCenter;
 
-public class FragmentMingXi extends Fragment
+import java.util.Calendar;
+import java.util.TimeZone;
+
+public class FragmentMingXi extends Fragment implements AbsListView.OnScrollListener
 {
-	private ListView 			mListView;
-	private MingXiAdapter 		mAdapter;
-	private LayoutInflater 		mInflater;
-	private View				mHeaderView;
-	private View 				mFooterView;
-	private View				mSearchView;
-	private View				mTitleView;
-	private ProgressBar 		mProgressBar;
-	private int					mCurProgress;
-	private TextView			mTvPaymoney;
-	private TextView			mTvIncomeMoney;
+	private ListView mListView;
+	private MingXiAdapter mAdapter;
+	private LayoutInflater mInflater;
+	private View mHeaderView;
+	private View mFooterView;
+	private ProgressBar mProgressBar;
+	private int mCurProgress;
+	private TextView mTvPayMoney;
+	private TextView mTvIncomeMoney;
+	private TextView mTvYear;
+	private TextView mTvMonth;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -60,9 +59,13 @@ public class FragmentMingXi extends Fragment
 		if(!hidden)
 		{
 			Log.d("hehe", "onHiddenChanged");
+
+			mAdapter.setDatas(RecordItemDetailManager.GetTimeLineRecordList());
 			mAdapter.notifyDataSetChanged();
 
-			setPayAndIncome();
+			setSelectPosition(Common.nPosition);
+			mListView.setSelection(Common.nPosition);
+			ListHeaderAndFooter();
 		}
 	}
 
@@ -70,30 +73,47 @@ public class FragmentMingXi extends Fragment
 	{
 		mListView = (ListView)view.findViewById(R.id.fg_mingxi_listView);
 
-		mSearchView = view.findViewById(R.id.id_fg_search);
-		mTitleView = view.findViewById(R.id.id_fg_title);
-
 		mHeaderView = mInflater.inflate(R.layout.fg_mingxi_item_header, mListView, false);
 		mFooterView = mInflater.inflate(R.layout.fg_mingxi_item_footer, mListView, false);
 
 		mListView.addHeaderView(mHeaderView);
 		mListView.addFooterView(mFooterView);
 
+		ListHeaderAndFooter();
 		mProgressBar = (ProgressBar)view.findViewById(R.id.id_progressbar);
 
-		mTvPaymoney = (TextView)view.findViewById(R.id.id_top_textView_expenditure_money);
+		mTvPayMoney = (TextView)view.findViewById(R.id.id_top_textView_expenditure_money);
 		mTvIncomeMoney = (TextView)view.findViewById(R.id.id_top_textView_income_money);
+
+		mTvYear = (TextView)view.findViewById(R.id.id_desc_year);
+		mTvMonth = (TextView)view.findViewById(R.id.id_desc_month);
+
+		mListView.setOnScrollListener(this);
+	}
+
+	private void ListHeaderAndFooter()
+	{
+		if(ControlCenter.GetRecordItemDetails().size() == 0)
+		{
+			mHeaderView.setVisibility(View.GONE);
+			mFooterView.setVisibility(View.GONE);
+		}
+		else
+		{
+			mHeaderView.setVisibility(View.VISIBLE);
+			mFooterView.setVisibility(View.VISIBLE);
+		}
 	}
 
 	private void initDatas()
 	{
 		mCurProgress = 0;
 
-		mAdapter = new MingXiAdapter(mInflater.getContext() ,R.layout.fg_mingxi_item, ControlCenter.GetRecordItemDetails());
+		mAdapter = new MingXiAdapter(mInflater.getContext(), R.layout.fg_mingxi_item, RecordItemDetailManager.GetTimeLineRecordList());
+		//setCurProgress(100);
 
-		setCurProgress(50);
-
-		setPayAndIncome();
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
+		setPayAndIncome(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
 	}
 
 	private void initEvents()
@@ -103,17 +123,53 @@ public class FragmentMingXi extends Fragment
 		mListView.setOverScrollMode(View.OVER_SCROLL_NEVER);// 去掉回弹阴影效果
 	}
 
-	public void setPayAndIncome()
+	public void setSelectPosition(int position)
 	{
-		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
-		IncomeAndPay incomeAndPay =  DateInforManager.GetLastMonthIncomeAndPay(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1);
-		mTvPaymoney.setText(String.valueOf(incomeAndPay.dPay));
-		mTvIncomeMoney.setText(String.valueOf(incomeAndPay.dIncome));
+		if(RecordItemDetailManager.GetTimeLineRecordList() == null || RecordItemDetailManager.GetTimeLineRecordList().size() == 0)
+			return;
+
+		RecordItemDetails recordItemDetails = RecordItemDetailManager.GetTimeLineRecordList().get(position);
+		if(recordItemDetails.nYear != 0 && recordItemDetails.nMonth != 0 && recordItemDetails.nDay == 0)
+			setPayAndIncome(recordItemDetails.nYear, recordItemDetails.nMonth);
+		else if(recordItemDetails.nYear == 0 && recordItemDetails.nMonth == 0 && recordItemDetails.nDay != 0)
+			;
+		else
+			setPayAndIncome(recordItemDetails.nYear, recordItemDetails.nMonth);
+	}
+
+	public void setPayAndIncome(int year, int month)
+	{
+		IncomeAndPay incomeAndPay = DateInforManager.GetSpecialMonthIncomeAndPay(year, month);
+		if(incomeAndPay == null)
+		{
+			mTvPayMoney.setText("0");
+			mTvIncomeMoney.setText("0");
+		}
+		else
+		{
+			mTvPayMoney.setText(String.format("%.2f", incomeAndPay.dPay));
+			mTvIncomeMoney.setText(String.format("%.2f", incomeAndPay.dIncome));
+		}
+
+		mTvYear.setText(String.valueOf(year));
+		mTvMonth.setText(String.valueOf(month) + "月");
 	}
 
 	private void setCurProgress(int progress)
 	{
 		mCurProgress = progress;
 		mProgressBar.setProgress(mCurProgress);
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView absListView, int i)
+	{
+
+	}
+
+	@Override
+	public void onScroll(AbsListView absListView, int i, int i1, int i2)
+	{
+		setSelectPosition(i);
 	}
 }
