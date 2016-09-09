@@ -1,0 +1,45 @@
+package com.stormbill.stormbill.common_type;
+
+public class CalenderDate
+{
+	private int nYear;
+	private int nMonth;
+	private int nDay;
+
+	public CalenderDate()
+	{
+		nYear = 0;
+		nMonth = 0;
+		nDay = 0;
+	}
+
+	public int getnYear()
+	{
+		return nYear;
+	}
+
+	public void setYear(int nYear)
+	{
+		this.nYear = nYear;
+	}
+
+	public int getMonth()
+	{
+		return nMonth;
+	}
+
+	public void setMonth(int nMonth)
+	{
+		this.nMonth = nMonth;
+	}
+
+	public int getDay()
+	{
+		return nDay;
+	}
+
+	public void setDay(int nDay)
+	{
+		this.nDay = nDay;
+	}
+}
