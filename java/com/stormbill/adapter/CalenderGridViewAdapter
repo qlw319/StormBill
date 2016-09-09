@@ -5,19 +5,20 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.GridLayoutAnimationController;
 import android.widget.LinearLayout;
 
-import java.util.List;
 import com.stormbill.stormbill.R;
 import com.stormbill.stormbill.common_type.CalenderDate;
 import com.stormbill.stormbill.common_type.IncomeAndPay;
 import com.stormbill.stormbill.data_manager.DateInforManager;
 
+import java.util.Calendar;
+import java.util.List;
+
 public class CalenderGridViewAdapter extends CommonAdapter<CalenderDate>
 {
 	private Context mContext;
+
 	public CalenderGridViewAdapter(Context context, int layoutId, List<CalenderDate> datas)
 	{
 		super(context, layoutId, datas);
@@ -36,13 +37,13 @@ public class CalenderGridViewAdapter extends CommonAdapter<CalenderDate>
 
 		if(calenderDate.getDay() == 0)
 		{
-			viewHolder.setText(R.id.id_day, "");
-			viewHolder.setText(R.id.id_day_pay, "");
-			viewHolder.setText(R.id.id_day_income, "");
+			viewHolder.setText(R.id.id_day, "").setText(R.id.id_day_pay, "").setText(R.id.id_day_income, "");
+			linearLayout.setBackgroundResource(R.drawable.rectangle_calender_write);
 		}
 		else
 		{
 			viewHolder.setText(R.id.id_day, Integer.toString(calenderDate.getDay()));
+			viewHolder.setTextColor(R.id.id_day, R.color.black);
 			IncomeAndPay incomeAndPay = DateInforManager.GetSpecifyDayIncomeAndPay(calenderDate.getnYear(), calenderDate.getMonth(), calenderDate.getDay());
 			if(incomeAndPay == null)
 			{
@@ -51,11 +52,22 @@ public class CalenderGridViewAdapter extends CommonAdapter<CalenderDate>
 			}
 			else
 			{
-				viewHolder.setText(R.id.id_day_pay, String.valueOf(incomeAndPay.dPay))
-						.setTextColor(R.id.id_day_pay, Color.RED)
-						.setText(R.id.id_day_income, String.valueOf(incomeAndPay.dIncome))
-						.setTextColor(R.id.id_day_income, Color.GREEN);
+				viewHolder.setText(R.id.id_day_pay, "-" + incomeAndPay.dPay).setTextColor(R.id.id_day_pay, Color.RED).setText(R.id.id_day_income, String.valueOf(incomeAndPay.dIncome)).setTextColor(R.id.id_day_income, Color.GREEN);
 			}
+
+			Calendar calendar = Calendar.getInstance();
+			int nYear = calendar.get(Calendar.YEAR);
+			int nMonth = calendar.get(Calendar.MONTH) + 1;
+			int nDay = calendar.get(Calendar.DAY_OF_MONTH);
+			if(calenderDate.getnYear() == nYear && calenderDate.getMonth() == nMonth)
+			{
+				if(calenderDate.getDay() == nDay)
+					linearLayout.setBackgroundResource(R.drawable.rectangle_calender_blue);
+			}
+			else if(calenderDate.getDay() == 1)
+				linearLayout.setBackgroundResource(R.drawable.rectangle_calender_blue);
+			else
+				linearLayout.setBackgroundResource(R.drawable.rectangle_calender_write);
 		}
 	}
 }
