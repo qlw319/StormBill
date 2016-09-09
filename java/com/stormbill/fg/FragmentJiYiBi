@@ -28,11 +28,13 @@ import android.widget.Toast;
 
 import com.stormbill.stormbill.R;
 import com.stormbill.stormbill.activity.MainActivity;
+import com.stormbill.stormbill.adapter.AccountGroupAdapter;
 import com.stormbill.stormbill.adapter.MemberGroupAdapter;
 import com.stormbill.stormbill.adapter.ViewPagerAdapter;
 import com.stormbill.stormbill.callback.FragmentCallBack;
 import com.stormbill.stormbill.common.Calculator;
 import com.stormbill.stormbill.common.Common;
+import com.stormbill.stormbill.common_type.BillTypes;
 import com.stormbill.stormbill.common_type.RecordItemDetails;
 import com.stormbill.stormbill.datastructs.ControlCenter;
 
@@ -77,6 +79,7 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 
 	private PopupWindow m_AccountPopupWindow;
 	private View m_AccountView;
+	private ListView lv_account_group;
 
 	private PopupWindow m_RemarkPopupWindow;
 	private View m_RemarkView;
@@ -103,13 +106,13 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 	{
 		if(!hidden)
 		{
-			Log.d("hehe", "onHiddenChanged");
 			Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
 			SimpleDateFormat sfYear = new SimpleDateFormat("M月d日");
 			String strTime = sfYear.format(calendar.getTime());
 
 			mBtnTime.setText(strTime);
 
+			Common.mRecordItemDetails.reset();
 			Common.mRecordItemDetails.nYear = calendar.get(Calendar.YEAR);
 			Common.mRecordItemDetails.nMonth = calendar.get(Calendar.MONTH) + 1;
 			Common.mRecordItemDetails.nDay = calendar.get(Calendar.DATE);
@@ -191,12 +194,26 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 				{
 					mBtnPay.setTextColor(getResources().getColor(R.color.blues));
 					mBtnIncome.setTextColor(getResources().getColor(R.color.black));
-					bIsPay= true;
+
+					ArrayList<BillTypes> billTypesList = ControlCenter.GetPayBillTypes();
+					if(billTypesList.size() > 0)
+					{
+						Common.mImgType.setImageResource(billTypesList.get(0).nPicture);
+						Common.mTvType.setText(billTypesList.get(0).strName);
+					}
+					bIsPay = true;
 				}
 				else if(position == 1)
 				{
 					mBtnIncome.setTextColor(getResources().getColor(R.color.blues));
 					mBtnPay.setTextColor(getResources().getColor(R.color.black));
+
+					ArrayList<BillTypes> billTypesList = ControlCenter.GetIncomeBillTypes();
+					if(billTypesList.size() > 0)
+					{
+						Common.mImgType.setImageResource(billTypesList.get(0).nPicture);
+						Common.mTvType.setText(billTypesList.get(0).strName);
+					}
 					bIsPay = false;
 				}
 			}
@@ -216,12 +233,32 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 		{
 			case R.id.id_btn_income:
 			{
+				if(bIsPay == false)
+					break;
+
 				mViewPager.setCurrentItem(1);
+				ArrayList<BillTypes> billTypesList = ControlCenter.GetIncomeBillTypes();
+				if(billTypesList.size() > 0)
+				{
+					Common.mImgType.setImageResource(billTypesList.get(0).nPicture);
+					Common.mTvType.setText(billTypesList.get(0).strName);
+				}
+				bIsPay = false;
 			}
 			break;
 			case R.id.id_btn_pay:
 			{
+				if(bIsPay)
+					break;
+
 				mViewPager.setCurrentItem(0);
+				ArrayList<BillTypes> billTypesList = ControlCenter.GetPayBillTypes();
+				if(billTypesList.size() > 0)
+				{
+					Common.mImgType.setImageResource(billTypesList.get(0).nPicture);
+					Common.mTvType.setText(billTypesList.get(0).strName);
+				}
+				bIsPay = true;
 			}
 			break;
 
@@ -325,36 +362,31 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 					Toast.makeText(mInflater.getContext(), "金额不能为0", Toast.LENGTH_SHORT).show();
 				else
 				{
-					new Thread(new Runnable()
-					{
-						@Override
-						public void run()
-						{
-							if(bIsPay)
-								Common.mRecordItemDetails.dPayMoney = Double.valueOf(strMoney);
-							else
-								Common.mRecordItemDetails.dIncomeMoney = Double.valueOf(strMoney);
 
-							String strTemp = mEditText.getText().toString();
-							Common.mRecordItemDetails.strRemark = strTemp;
+					if(bIsPay)
+						Common.mRecordItemDetails.dPayMoney = Double.valueOf(strMoney);
+					else
+						Common.mRecordItemDetails.dIncomeMoney = Double.valueOf(strMoney);
 
-							ControlCenter.AddARecordItem(Common.mRecordItemDetails);
-							ControlCenter.GetRecordItemDetails();
-							Common.mAddFinish = true;
-							mCalculator.reset();
+					String strTemp = mEditText.getText().toString();
+					Common.mRecordItemDetails.strRemark = strTemp;
 
-							strMoney = mCalculator.getResult();
-							strBigFormula = mCalculator.getResult();
-							strSmallFormula = mCalculator.getFormula();
+					ControlCenter.AddARecordItem(Common.mRecordItemDetails);
+					ControlCenter.GetRecordItemDetails();
+					Common.mRecordItemDetails.reset();
 
-							mTvMoney.setText(strMoney);
-							mTvBigMoney.setText(strBigFormula);
-							mTvSmallMoney.setText(strSmallFormula);
+					mCalculator.reset();
 
-							mTvMoney.setVisibility(View.VISIBLE);
-							mLayout.setVisibility(View.GONE);
-						}
-					}).start();
+					strMoney = mCalculator.getResult();
+					strBigFormula = mCalculator.getResult();
+					strSmallFormula = mCalculator.getFormula();
+
+					mTvMoney.setText(strMoney);
+					mTvBigMoney.setText(strBigFormula);
+					mTvSmallMoney.setText(strSmallFormula);
+
+					mTvMoney.setVisibility(View.VISIBLE);
+					mLayout.setVisibility(View.GONE);
 
 					if(view.getId() == R.id.id_btn_ok)
 					{
@@ -395,7 +427,7 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 			@Override
 			public void onDismiss()
 			{
-//				fragmentCallBack.callbackFun(null);
+				//				fragmentCallBack.callbackFun(null);
 			}
 		});
 	}
@@ -445,7 +477,7 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 			TextView tv = (TextView)m_AccountView.findViewById(R.id.title);
 			tv.setText("选择账户");
 			tv.setTextSize(20);
-			lv_member_group = (ListView)m_AccountView.findViewById(R.id.lvGroup);
+			lv_account_group = (ListView)m_AccountView.findViewById(R.id.lvGroup);
 			m_AccountPopupWindow = new PopupWindow(m_AccountView, LinearLayout.LayoutParams.MATCH_PARENT, 500);
 		}
 
@@ -453,7 +485,8 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 		m_AccountPopupWindow.setOutsideTouchable(true);
 		m_AccountPopupWindow.showAtLocation(parent, Gravity.BOTTOM, 0, 0);
 
-		lv_member_group.setOnItemClickListener(new AdapterView.OnItemClickListener()
+		lv_account_group.setAdapter(new AccountGroupAdapter(mInflater.getContext(), R.layout.group_member_view, ControlCenter.GetWalletTypes()));
+		lv_account_group.setOnItemClickListener(new AdapterView.OnItemClickListener()
 		{
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
@@ -483,14 +516,13 @@ public class FragmentJiYiBi extends Fragment implements View.OnClickListener
 					int day = i2;
 
 					Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+08:00"));
-									//  当前    		选择
+					//  当前    		选择
 					if(calendar.get(Calendar.YEAR) < year)
 					{
 						Toast.makeText(mInflater.getContext(), "日期不能超过今年", Toast.LENGTH_SHORT).show();
 						return;
 					}
-					else if(calendar.get(Calendar.YEAR) < year &&
-							calendar.get(Calendar.MONTH) + 1 < month)
+					else if(calendar.get(Calendar.YEAR) < year && calendar.get(Calendar.MONTH) + 1 < month)
 					{
 						Toast.makeText(mInflater.getContext(), "日期不能超过当月", Toast.LENGTH_SHORT).show();
 						return;
