@@ -1,0 +1,22 @@
+package com.stormbill.stormbill.common_type;
+
+public class GraphRatioType
+{
+	public boolean bIncome;
+	public double dTotalMoney;
+	public int nBillTypeId;
+
+	public GraphRatioType()
+	{
+		bIncome = false;
+		dTotalMoney = 0;
+		nBillTypeId = 0;
+	}
+
+	public void Instead(GraphRatioType other)
+	{
+		dTotalMoney = other.dTotalMoney;
+		bIncome = other.bIncome;
+		nBillTypeId = 0;
+	}
+}
