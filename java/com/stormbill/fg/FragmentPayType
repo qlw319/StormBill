@@ -1,8 +1,7 @@
 package com.stormbill.stormbill.fg;
 
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,17 +12,14 @@ import android.widget.TextView;
 
 import com.stormbill.stormbill.R;
 import com.stormbill.stormbill.adapter.GridViewAdapter;
-import com.stormbill.stormbill.bean.GridEntity;
 import com.stormbill.stormbill.common.Common;
 import com.stormbill.stormbill.datastructs.ControlCenter;
 
-import java.util.ArrayList;
-
 public class FragmentPayType extends Fragment
 {
-	private LayoutInflater 			mInflater;
-	private GridView 				mGridView;
-	private GridViewAdapter 		mAdapter;
+	private LayoutInflater mInflater;
+	private GridView mGridView;
+	private GridViewAdapter mAdapter;
 	private View mBaseView;
 
 	@Override
