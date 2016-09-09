@@ -3,9 +3,7 @@ package com.stormbill.stormbill.common;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.stormbill.stormbill.common_type.BillTypes;
 import com.stormbill.stormbill.common_type.RecordItemDetails;
-import com.stormbill.stormbill.common_type.WalletTypes;
 
 /**
  * Created by Administrator on 2016/8/31 0031.
@@ -16,4 +14,5 @@ public class Common
 	public static ImageView mImgType;
 	public static RecordItemDetails mRecordItemDetails;
 	public static boolean mAddFinish = false;
+	public static int nPosition = 0;
 }
